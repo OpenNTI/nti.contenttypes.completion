@@ -22,7 +22,7 @@ setup(
     version=_read('version.txt').strip(),
     author='Jason Madden',
     author_email='jason@nextthought.com',
-    description="NTI Base",
+    description="NTI ContentTypes Completion",
     long_description=(
         _read('README.rst') 
         + '\n\n' 
