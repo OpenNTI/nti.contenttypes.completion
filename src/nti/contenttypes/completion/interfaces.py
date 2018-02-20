@@ -16,7 +16,12 @@ from zope.container.constraints import containers
 from zope.container.interfaces import IContained
 from zope.container.interfaces import IContainer
 
+from zope.interface.interfaces import ObjectEvent
+from zope.interface.interfaces import IObjectEvent
+
 from nti.dataserver.interfaces import IUser
+
+from nti.property.property import alias
 
 from nti.schema.field import Bool
 from nti.schema.field import Dict
@@ -38,33 +43,6 @@ from nti.schema.jsonschema import UI_TYPE_EMAIL
 from nti.schema.jsonschema import TAG_HIDDEN_IN_UI
 from nti.schema.jsonschema import TAG_REQUIRED_IN_UI
 
-
-class IProgress(interface.Interface):
-    """
-    Indicates the progress made on underlying :class:`ICompletableItem`
-    content, generally only useful to inform on progress towards
-    completing an item that is not yet completed.
-    """
-
-    AbsoluteProgress = Number(title=u"A number indicating the absolute progress made on an item.",
-                              default=0)
-
-    MaxPossibleProgress = Number(title=u"A number indicating the max possible progress that could be made on an item. May be null.",
-                                 default=0)
-
-    Completed = Bool(title=u"Indicates the user has completed this item.",
-                     default=False)
-
-    ntiid = ValidTextLine(title=u"The ntiid of the :class:`ICompletableItem.",
-                          required=True)
-
-    LastModified = ValidDatetime(title=u"The date of the last progress.",
-                                 required=False)
-
-    CompletedDate = ValidDatetime(title=u"The completed date",
-                                  description=u"The date on which the item was completed by the user",
-                                  default=None,
-                                  required=False)
 
 class ICompletableItem(interface.Interface):
     """
@@ -159,3 +137,54 @@ class ICompletedItemContainer(IContainer):
 
     contains(IUserCompletedItemContainer)
 
+
+class IProgress(interface.Interface):
+    """
+    Indicates the progress made on underlying :class:`ICompletableItem`
+    content, generally only useful to inform on progress towards
+    completing an item that is not yet completed.
+    """
+
+    AbsoluteProgress = Number(title=u"A number indicating the absolute progress made on an item.",
+                              default=0)
+
+    MaxPossibleProgress = Number(title=u"A number indicating the max possible progress that could be made on an item. May be null.",
+                                 default=0)
+
+    Completed = Bool(title=u"Indicates the user has completed this item.",
+                     default=False)
+
+    ntiid = ValidTextLine(title=u"The ntiid of the :class:`ICompletableItem.",
+                          required=True)
+
+    LastModified = ValidDatetime(title=u"The date of the last progress.",
+                                 required=False)
+
+    CompletedDate = ValidDatetime(title=u"The completed date",
+                                  description=u"The date on which the item was completed by the user",
+                                  default=None,
+                                  required=False)
+
+
+class IUserProgressUpdatedEvent(IObjectEvent):
+    """
+    Event to indicate a user has made progress on a :class:`ICompletableItem`.
+    """
+
+    user = Object(IUser, title=u"User", required=True)
+
+    item = Object(ICompletableItem,
+                  title=u"Completable item",
+                  required=True)
+
+    context = Object(ICompletionContext, title=u"Completion context", required=True)
+
+
+class UserProgressUpdatedEvent(ObjectEvent):
+
+    item = alias('object')
+
+    def __init__(self, obj, user, context):
+        super(UserProgressUpdatedEvent, self).__init__(obj)
+        self.user = user
+        self.context = context
