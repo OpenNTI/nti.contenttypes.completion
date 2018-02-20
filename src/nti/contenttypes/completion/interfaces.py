@@ -19,7 +19,7 @@ from zope.container.interfaces import IContainer
 from zope.interface.interfaces import ObjectEvent
 from zope.interface.interfaces import IObjectEvent
 
-from nti.dataserver.interfaces import IUser
+from nti.coremetadata.interfaces import IUser
 
 from nti.property.property import alias
 
@@ -168,7 +168,8 @@ class IProgress(interface.Interface):
 
 class IUserProgressUpdatedEvent(IObjectEvent):
     """
-    Event to indicate a user has made progress on a :class:`ICompletableItem`.
+    Event to indicate a user has made progress on a :class:`ICompletableItem`,
+    within a :class:`ICompletionContext`.
     """
 
     user = Object(IUser, title=u"User", required=True)
