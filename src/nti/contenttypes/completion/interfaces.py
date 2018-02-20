@@ -84,6 +84,46 @@ class ICompletionContext(ICompletableItem):
                    default=False)
 
 
+class ICompletableItemPolicy(interface.Interface):
+    """
+    A policy for :class:`ICompletableItem` objects that determines the
+    conditions in which the :class:`ICompletableItem' object can be
+    considered complete.
+    """
+
+    def is_complete(self, progress):
+        """
+        Determines if the given progress is enough for the item to be
+        considereed complete.
+        """
+
+
+class ICompletionContextPolicy(ICompletableItemPolicy):
+    """
+    A :class:`ICompletableItemPolicy` for :class:`ICompletionContext` objects
+    that determines the conditions in which the :class:`ICompletionContext'
+    object can be considered complete, usually as a function of how many
+    underlying :class:`ICompletableItem` items have been completed.
+    """
+
+    Count = Number(title=u"The number of items",
+                   description=u"""The number of items, that once complete by
+                   a user will enable the overarching context to be considered
+                   complete""",
+                   required=False,
+                   min=0.0,
+                   default=None)
+
+    Percentage = Number(title=u"Percentage of required items",
+                        description=u"""The percentage of required items, that
+                        once complete by a user will enable the overarching
+                        context to be considered complete""",
+                        required=False,
+                        min=0.0,
+                        max=1.0,
+                        default=None)
+
+
 class ICompletableItemContainer(interface.Interface):
     """
     Contains items that are required to be completed for a
@@ -190,7 +230,9 @@ class IUserProgressUpdatedEvent(IObjectEvent):
                   title=u"Completable item",
                   required=True)
 
-    context = Object(ICompletionContext, title=u"Completion context", required=True)
+    context = Object(ICompletionContext,
+                     title=u"Completion context",
+                     required=True)
 
 
 class UserProgressUpdatedEvent(ObjectEvent):
