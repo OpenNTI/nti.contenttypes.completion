@@ -46,8 +46,8 @@ from nti.schema.jsonschema import TAG_REQUIRED_IN_UI
 
 class ICompletableItem(interface.Interface):
     """
-    A interface for items that may be completable under once certain conditions
-    are met.
+    A interface for items that may be completable once certain conditions are
+    met.
     """
 
 
@@ -71,11 +71,11 @@ class ICompletedItem(IContained):
                                   required=True)
 
 
-class ICompletionContext(interface.Interface):
+class ICompletionContext(ICompletableItem):
     """
-    An interface identifying an item that may be 'completed', according to a
-    user interacting with underlying :class:`ICompletableItem` content in
-    such a way to fulfill this context's requirements.
+    A :class:`ICompletableItem` that may be completed by completing one or many
+    underlying :class:`ICompletableItem` objects (defined by a
+    :class:`ICompletionContextPolicy`).
     """
 
     enabled = Bool(title=u"Completion context enabled",
@@ -127,6 +127,12 @@ class IUserCompletedItemContainer(IContainer, IContained):
         None if it does not exist.
         """
 
+    def remove_item(self, item):
+        """
+        Remove all :class:`ICompletedItem` referenced by the given
+        :class:`ICompletableItem` from this container.
+        """
+
 
 class ICompletedItemContainer(IContainer):
     """
@@ -136,6 +142,12 @@ class ICompletedItemContainer(IContainer):
     """
 
     contains(IUserCompletedItemContainer)
+
+    def remove_item(self, item):
+        """
+        Remove all :class:`ICompletedItem` referenced by the given
+        :class:`ICompletableItem`.
+        """
 
 
 class IProgress(interface.Interface):
