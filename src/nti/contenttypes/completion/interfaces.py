@@ -23,6 +23,7 @@ from nti.coremetadata.interfaces import IUser
 
 from nti.property.property import alias
 
+from nti.schema.field import Set
 from nti.schema.field import Bool
 from nti.schema.field import Dict
 from nti.schema.field import Text
@@ -94,7 +95,7 @@ class ICompletableItemPolicy(interface.Interface):
     def is_complete(self, progress):
         """
         Determines if the given progress is enough for the item to be
-        considereed complete.
+        considered complete.
         """
 
 
@@ -122,6 +123,17 @@ class ICompletionContextPolicy(ICompletableItemPolicy):
                         min=0.0,
                         max=1.0,
                         default=None)
+
+
+class ICompletableItemDefaultRequiredPolicy(interface.Interface):
+    """
+    A policy for :class:`ICompletionContext` objects that defines
+    objects that, by default, are required for completion.
+    """
+
+    mime_types = Set(title=u"mime types of required objects",
+                     description=u"""The mime types of objects that should be
+                     required, by default, for the completion context.""")
 
 
 class ICompletableItemContainer(interface.Interface):
