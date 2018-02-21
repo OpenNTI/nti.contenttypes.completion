@@ -75,17 +75,12 @@ class ICompletedItem(IContained):
 class ICompletionContext(ICompletableItem):
     """
     A :class:`ICompletableItem` that may be completed by completing one or many
-    underlying :class:`ICompletableItem` objects (defined by a
-    :class:`ICompletionContextPolicy`).
+    :class:`ICompletableItem` objects (defined by a
+    :class:`ICompletionContextCompletionPolicy`).
     """
 
-    enabled = Bool(title=u"Completion context enabled",
-                   description=u"Whether this completion context has been enabled/disabled",
-                   required=True,
-                   default=False)
 
-
-class ICompletableItemPolicy(interface.Interface):
+class ICompletableItemCompletionPolicy(interface.Interface):
     """
     A policy for :class:`ICompletableItem` objects that determines the
     conditions in which the :class:`ICompletableItem' object can be
@@ -99,9 +94,9 @@ class ICompletableItemPolicy(interface.Interface):
         """
 
 
-class ICompletionContextPolicy(ICompletableItemPolicy):
+class ICompletionContextCompletionPolicy(ICompletableItemCompletionPolicy):
     """
-    A :class:`ICompletableItemPolicy` for :class:`ICompletionContext` objects
+    A :class:`ICompletableItemCompletionPolicy` for :class:`ICompletionContext` objects
     that determines the conditions in which the :class:`ICompletionContext'
     object can be considered complete, usually as a function of how many
     underlying :class:`ICompletableItem` items have been completed.
