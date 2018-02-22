@@ -225,6 +225,14 @@ class IProgress(interface.Interface):
     LastModified = ValidDatetime(title=u"The date of the last progress.",
                                  required=False)
 
+    Completed = Bool(title=u"Indicates the user has completed this item.",
+                     default=False)
+
+    CompletedDate = ValidDatetime(title=u"The completed date",
+                                  description=u"The date on which the item was completed by the user",
+                                  default=None,
+                                  required=False)
+
 
 class IUserProgressUpdatedEvent(IObjectEvent):
     """
