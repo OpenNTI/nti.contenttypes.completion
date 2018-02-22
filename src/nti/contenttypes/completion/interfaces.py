@@ -79,6 +79,12 @@ class ICompletionContext(ICompletableItem):
     :class:`ICompletionContextCompletionPolicy`).
     """
 
+    def has_user_completed_item(user, item):
+        """
+        Returns a :class:`ICompletedItem` if the given user has completed the
+        given item.
+        """
+
 
 class ICompletableItemCompletionPolicy(interface.Interface):
     """
@@ -87,7 +93,7 @@ class ICompletableItemCompletionPolicy(interface.Interface):
     considered complete.
     """
 
-    def is_complete(self, progress):
+    def is_complete(progress):
         """
         Determines if the given progress is enough for the item to be
         considered complete.
@@ -138,12 +144,12 @@ class ICompletableItemContainer(interface.Interface):
     not-required for our :class:`ICompletionContext`.
     """
 
-    def add_required_item(self, item):
+    def add_required_item(item):
         """
         Add a :class:`ICompletableItem` to this context as a required item.
         """
 
-    def add_optional_item(self, item):
+    def add_optional_item(item):
         """
         Add a :class:`ICompletableItem` to this context as not required.
         """
@@ -163,18 +169,18 @@ class IUserCompletedItemContainer(IContainer, IContained):
                   description=u"The user who has completed these items.",
                   required=True)
 
-    def add_completed_item(self, item):
+    def add_completed_item(item):
         """
         Add a :class:`ICompletedItem` to the container.
         """
 
-    def get_completed_item(self, item):
+    def get_completed_item(item):
         """
         Return the :class:`ICompletedItem` from this container, returning
         None if it does not exist.
         """
 
-    def remove_item(self, item):
+    def remove_item(item):
         """
         Remove all :class:`ICompletedItem` referenced by the given
         :class:`ICompletableItem` from this container.
@@ -190,7 +196,7 @@ class ICompletedItemContainer(IContainer):
 
     contains(IUserCompletedItemContainer)
 
-    def remove_item(self, item):
+    def remove_item(item):
         """
         Remove all :class:`ICompletedItem` referenced by the given
         :class:`ICompletableItem`.
@@ -210,19 +216,14 @@ class IProgress(interface.Interface):
     MaxPossibleProgress = Number(title=u"A number indicating the max possible progress that could be made on an item. May be null.",
                                  default=0)
 
-    Completed = Bool(title=u"Indicates the user has completed this item.",
-                     default=False)
+    HasProgress = Bool(title=u"Indicates the user has some progress on this item.",
+                       default=False)
 
     ntiid = ValidTextLine(title=u"The ntiid of the :class:`ICompletableItem.",
                           required=True)
 
     LastModified = ValidDatetime(title=u"The date of the last progress.",
                                  required=False)
-
-    CompletedDate = ValidDatetime(title=u"The completed date",
-                                  description=u"The date on which the item was completed by the user",
-                                  default=None,
-                                  required=False)
 
 
 class IUserProgressUpdatedEvent(IObjectEvent):
