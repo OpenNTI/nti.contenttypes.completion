@@ -58,6 +58,7 @@ setup(
         'setuptools',
         'six',
         'zope.component',
+        'zope.container',
         'zope.interface',
         'zope.security',
     ],
