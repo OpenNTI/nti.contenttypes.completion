@@ -88,10 +88,17 @@ class ICompletableItemCompletionPolicy(interface.Interface):
 
 class ICompletionContextCompletionPolicy(ICompletableItemCompletionPolicy):
     """
-    A :class:`ICompletableItemCompletionPolicy` for :class:`ICompletionContext` objects
-    that determines the conditions in which the :class:`ICompletionContext'
-    object can be considered complete, usually as a function of how many
-    underlying :class:`ICompletableItem` items have been completed.
+    A :class:`ICompletableItemCompletionPolicy` for :class:`ICompletionContext`
+    objects that determines the conditions in which the
+    :class:`ICompletionContext' object can be considered complete.
+    """
+
+
+class ICompletionContextAggregateCompletionPolicy(ICompletionContextCompletionPolicy):
+    """
+    A :class:`ICompletionContextCompletionPolicy` that bases completion based
+    on how many (or what fraction of) referenced :class:`ICompletableItem` items
+    have been completed.
     """
 
     Count = Number(title=u"The number of items",
