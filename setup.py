@@ -52,6 +52,7 @@ setup(
     tests_require=TESTS_REQUIRE,
     install_requires=[
         'nti.coremetadata',
+        'nti.externalization',
         'nti.property',
         'nti.schema',
         'setuptools',

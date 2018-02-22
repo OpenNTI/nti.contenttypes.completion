@@ -25,24 +25,10 @@ from nti.property.property import alias
 
 from nti.schema.field import Set
 from nti.schema.field import Bool
-from nti.schema.field import Dict
-from nti.schema.field import Text
-from nti.schema.field import Choice
 from nti.schema.field import Object
 from nti.schema.field import Number
-from nti.schema.field import Iterable
-from nti.schema.field import Timedelta
-from nti.schema.field import ValidText
-from nti.schema.field import ListOrTuple
 from nti.schema.field import ValidDatetime
 from nti.schema.field import ValidTextLine
-from nti.schema.field import UniqueIterable
-from nti.schema.field import TupleFromObject
-
-from nti.schema.jsonschema import TAG_UI_TYPE
-from nti.schema.jsonschema import UI_TYPE_EMAIL
-from nti.schema.jsonschema import TAG_HIDDEN_IN_UI
-from nti.schema.jsonschema import TAG_REQUIRED_IN_UI
 
 
 class ICompletableItem(interface.Interface):
