@@ -8,8 +8,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# pylint: disable=inherit-non-class,expression-not-assigned
-
 from zope import interface
 
 from zope.container.constraints import contains
@@ -21,7 +19,7 @@ from zope.container.interfaces import IContainer
 from zope.interface.interfaces import ObjectEvent
 from zope.interface.interfaces import IObjectEvent
 
-from nti.coremetadata.interfaces import IUser
+from zope.security.interfaces import IPrincipal
 
 from nti.property.property import alias
 
@@ -42,14 +40,14 @@ class ICompletableItem(interface.Interface):
 
 class ICompletedItem(IContained):
     """
-    Metadata information about the user, item, time when an
+    Metadata information about the principal, item, time when an
     :class:`ICompletableItem` was completed.
     """
 
-    User = Object(IUser,
-                  title=u'The user',
-                  description=u"The user who completed the item",
-                  required=True)
+    Principal = Object(IPrincipal,
+                       title=u'The principal',
+                       description=u"The principal who completed the item",
+                       required=True)
 
     Item = Object(ICompletableItem,
                   title=u'The completable item',
@@ -144,13 +142,43 @@ class ICompletableItemContainer(interface.Interface):
         Add a :class:`ICompletableItem` to this context as a required item.
         """
 
+    def remove_required_item(item):
+        """
+        Remove a :class:`ICompletableItem` as a required item.
+        """
+
+    def is_item_required(item):
+        """
+        Returns a bool if the given :class:`ICompletableItem` is required.
+        """
+
+    def get_required_item_count():
+        """
+        Return the count of required items.
+        """
+
     def add_optional_item(item):
         """
         Add a :class:`ICompletableItem` to this context as not required.
         """
 
+    def remove_optional_item(item):
+        """
+        Remove a :class:`ICompletableItem` as an optional item.
+        """
 
-class IUserCompletedItemContainer(IContainer, IContained):
+    def is_item_optional(item):
+        """
+        Returns a bool if the given :class:`ICompletableItem` is optional.
+        """
+
+    def get_optional_item_count():
+        """
+        Return the count of optional items.
+        """
+
+
+class IPrincipalCompletedItemContainer(IContainer, IContained):
     """
     Contains :class:`ICompletedItem` that have been completed by a user in a
     :class:`ICompletionContext`.
@@ -159,20 +187,25 @@ class IUserCompletedItemContainer(IContainer, IContained):
     contains(ICompletedItem)
     containers('.ICompletedItemContainer')
 
-    User = Object(IUser,
-                  title=u'The user',
-                  description=u"The user who has completed these items.",
-                  required=True)
+    Principal = Object(IPrincipal,
+                       title=u'The principal',
+                       description=u"The user principal has completed these items.",
+                       required=True)
 
-    def add_completed_item(item):
+    def add_completed_item(completed_item):
         """
         Add a :class:`ICompletedItem` to the container.
         """
 
     def get_completed_item(item):
         """
-        Return the :class:`ICompletedItem` from this container, returning
-        None if it does not exist.
+        Return the :class:`ICompletedItem` from this container given a
+        :class:`ICompletableItem`, returning None if it does not exist.
+        """
+
+    def get_completed_item_count():
+        """
+        Return the number of completed items by this principal.
         """
 
     def remove_item(item):
@@ -186,10 +219,16 @@ class ICompletedItemContainer(IContainer):
     """
     Contains items that have been completed for the
     :class:`ICompletionContext`, organized with
-    :class:`IUserCompletedItemContainer` objects.
+    :class:`IPrincipalCompletedItemContainer` objects.
     """
 
-    contains(IUserCompletedItemContainer)
+    contains(IPrincipalCompletedItemContainer)
+
+    def get_user_completed_items(principal):
+        """
+        Return the :class:`IPrincipalCompletedItemContainer` for the given
+        principal.
+        """
 
     def remove_item(item):
         """
@@ -235,7 +274,7 @@ class IUserProgressUpdatedEvent(IObjectEvent):
     within a :class:`ICompletionContext`.
     """
 
-    user = Object(IUser, title=u"User", required=True)
+    user = Object(IPrincipal, title=u"principal", required=True)
 
     item = Object(ICompletableItem,
                   title=u"Completable item",
