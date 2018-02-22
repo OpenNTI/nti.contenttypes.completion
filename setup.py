@@ -7,6 +7,7 @@ entry_points = {
 }
 
 TESTS_REQUIRE = [
+    'fudge',
     'nti.testing',
     'zope.dottedname',
     'zope.testrunner',
@@ -58,6 +59,7 @@ setup(
         'setuptools',
         'six',
         'zope.component',
+        'zope.container',
         'zope.interface',
         'zope.security',
     ],
