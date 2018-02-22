@@ -25,8 +25,8 @@ setup(
     author_email='jason@nextthought.com',
     description="NTI ContentTypes Completion",
     long_description=(
-        _read('README.rst') 
-        + '\n\n' 
+        _read('README.rst')
+        + '\n\n'
         + _read("CHANGES.rst")
     ),
     license='Apache',
@@ -51,6 +51,10 @@ setup(
     namespace_packages=['nti', 'nti.contenttypes'],
     tests_require=TESTS_REQUIRE,
     install_requires=[
+        'nti.coremetadata',
+        'nti.externalization',
+        'nti.property',
+        'nti.schema',
         'setuptools',
         'six',
         'zope.component',
