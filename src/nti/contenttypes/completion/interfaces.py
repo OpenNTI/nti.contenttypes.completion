@@ -246,6 +246,7 @@ class IUserProgressUpdatedEvent(IObjectEvent):
                      required=True)
 
 
+@interface.implementer(IUserProgressUpdatedEvent)
 class UserProgressUpdatedEvent(ObjectEvent):
 
     item = alias('object')
