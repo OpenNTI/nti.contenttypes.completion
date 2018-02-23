@@ -10,22 +10,28 @@ from __future__ import absolute_import
 
 from zope import interface
 
+from nti.contenttypes.completion.interfaces import ICompletedItem
+from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+
+from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeContainer
+
 from nti.property.property import alias
 
 from nti.schema.fieldproperty import createDirectFieldProperties
 
 from nti.schema.schema import SchemaConfigured
 
-from nti.completion.interfaces import IPrincipalCompletedItemContainer
-
 logger = __import__('logging').getLogger(__name__)
 
 
 @interface.implementer(IPrincipalCompletedItemContainer)
-class PrincipalCompletedItemContainer(SchemaConfigured):
+class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
+                                      SchemaConfigured):
     createDirectFieldProperties(IPrincipalCompletedItemContainer)
 
     user = alias('Principal')
+    __parent__ = None
+    __name__ = None
 
     def __init__(self, principal):
         super(PrincipalCompletedItemContainer, self).__init__()
@@ -56,3 +62,19 @@ class PrincipalCompletedItemContainer(SchemaConfigured):
         :class:`ICompletableItem` from this container.
         """
         return self.pop(item.ntiid, None)
+
+
+@interface.implementer(ICompletedItem)
+class CompletedItem(SchemaConfigured):
+    createDirectFieldProperties(ICompletedItem)
+
+    __parent__ = None
+    __name__ = None
+
+    user = alias('Principal')
+
+    def __init__(self, principal, item, completed_date):
+        super(CompletedItem, self).__init__()
+        self.Principal = principal
+        self.Item = item
+        self.CompletedDate = completed_date

@@ -61,6 +61,8 @@ setup(
         'nti.wref',
         'setuptools',
         'six',
+        'ZODB',
+        'zope.annotations',
         'zope.component',
         'zope.container',
         'zope.interface',

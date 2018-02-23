@@ -21,14 +21,14 @@ from zope.security.interfaces import IPrincipal
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
-from nti.containers.dicts import CaseInsensitiveLastModifiedDict
+from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeContainer
 
-from nti.completion.completion import PrincipalCompletedItemContainer
+from nti.contenttypes.completion.completion import PrincipalCompletedItemContainer
 
-from nti.completion.interfaces import ICompletionContext
-from nti.completion.interfaces import ICompletedItemContainer
-from nti.completion.interfaces import ICompletableItemContainer
-from nti.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import ICompletionContext
+from nti.contenttypes.completion.interfaces import ICompletedItemContainer
+from nti.contenttypes.completion.interfaces import ICompletableItemContainer
+from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
 
 from nti.schema.fieldproperty import createDirectFieldProperties
 
@@ -36,15 +36,15 @@ from nti.schema.schema import SchemaConfigured
 
 from nti.wref.interfaces import IWeakRef
 
-COMPLETED_ITEM_ANNOTATION_KEY = 'nti.completion.interfaces.ICompletedItemContainer'
-COMPLETABLE_ITEM_ANNOTATION_KEY = 'nti.completion.interfaces.ICompletableItemContainer'
+COMPLETED_ITEM_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletedItemContainer'
+COMPLETABLE_ITEM_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletableItemContainer'
 
 logger = __import__('logging').getLogger(__name__)
 
 
 @component.adapter(ICompletionContext)
 @interface.implementer(ICompletedItemContainer)
-class CompletedItemContainer(CaseInsensitiveLastModifiedDict,
+class CompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
                              SchemaConfigured):
     """
     Stores mappings of username -> IIUserCompletedItemContainer for a user.

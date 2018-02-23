@@ -10,6 +10,8 @@ from __future__ import absolute_import
 
 from zope import interface
 
+from zope.annotation.interfaces import IAttributeAnnotatable
+
 from zope.container.constraints import contains
 from zope.container.constraints import containers
 
@@ -58,18 +60,12 @@ class ICompletedItem(IContained):
                                   required=True)
 
 
-class ICompletionContext(ICompletableItem):
+class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     """
     A :class:`ICompletableItem` that may be completed by completing one or many
     :class:`ICompletableItem` objects (defined by a
     :class:`ICompletionContextCompletionPolicy`).
     """
-
-    def has_user_completed_item(user, item):
-        """
-        Returns a :class:`ICompletedItem` if the given user has completed the
-        given item.
-        """
 
 
 class ICompletableItemCompletionPolicy(interface.Interface):
