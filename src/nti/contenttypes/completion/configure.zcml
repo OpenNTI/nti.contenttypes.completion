@@ -8,15 +8,15 @@
     <include package="zope.component" />
 	<include package="zope.security" />
 
-    <adapter factory=".adapters._CompletedItemContainerFactory"
+    <adapter factory=".adapters.CompletedItemContainerFactory"
              provides=".interfaces.ICompletedItemContainer"
              for=".interfaces.ICompletionContext" />
 
-    <adapter factory=".adapters._CompletableItemContainerFactory"
+    <adapter factory=".adapters.CompletableItemContainerFactory"
              provides=".interfaces.ICompletableItemContainer"
              for=".interfaces.ICompletionContext" />
 
-    <adapter factory=".adapters._PrincipalCompletedItemContainerFactory"
+    <adapter factory=".adapters._context_to_principal_container"
              provides=".interfaces.IPrincipalCompletedItemContainer"
              for="zope.security.interfaces.IUser,
                  .interfaces.ICompletionContext" />
