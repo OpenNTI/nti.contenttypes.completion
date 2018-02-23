@@ -41,6 +41,7 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
         """
         Add a :class:`ICompletedItem` to the container.
         """
+        assert completed_item.Principal == self.user
         self[completed_item.Item.ntiid] = completed_item
 
     def get_completed_item(self, item):
@@ -61,7 +62,12 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
         Remove all :class:`ICompletedItem` referenced by the given
         :class:`ICompletableItem` from this container.
         """
-        return self.pop(item.ntiid, None)
+        try:
+            del self[item.ntiid]
+            result = True
+        except KeyError:
+            result = False
+        return result
 
 
 @interface.implementer(ICompletedItem)

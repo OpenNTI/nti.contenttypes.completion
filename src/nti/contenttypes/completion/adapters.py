@@ -77,8 +77,8 @@ class CompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
         """
         count = 0
         for user_container in self.values():
-            completed_item = user_container.remove_item(item)
-            if completed_item is not None:
+            did_remove = user_container.remove_item(item)
+            if did_remove:
                 count += 1
         return count
 

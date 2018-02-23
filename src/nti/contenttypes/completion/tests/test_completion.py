@@ -14,6 +14,8 @@ from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
 
+from nose.tools import assert_raises
+
 from nti.testing.matchers import validly_provides
 from nti.testing.matchers import verifiably_provides
 
@@ -89,14 +91,16 @@ class TestCompletion(unittest.TestCase):
                                                      IPrincipalCompletedItemContainer)
         assert_that(user_container2, is_not(user_container))
 
-    def test_completion(self):
+    def test_completed(self):
         now = datetime.utcnow()
         user1 = MockUser(u'user1')
+        user2 = MockUser(u'user2')
         completable1 = MockCompletableItem('completable1')
         completable2 = MockCompletableItem('completable2')
 
         completion_context = MockCompletionContext()
 
+        # Base cases
         completable_container = ICompletableItemContainer(completion_context)
         assert_that(completable_container.get_optional_item_count(), is_(0))
         assert_that(completable_container.get_required_item_count(), is_(0))
@@ -104,13 +108,69 @@ class TestCompletion(unittest.TestCase):
         completed_container = ICompletedItemContainer(completion_context)
         assert_that(completed_container, not_none())
         assert_that(completed_container, has_length(0))
+        assert_that(completed_container.get_completed_item_count(completable1), is_(0))
+        assert_that(completed_container.remove_item(completable1), is_(0))
 
         user_container = component.queryMultiAdapter((user1, completion_context),
                                                      IPrincipalCompletedItemContainer)
         assert_that(user_container, not_none())
+        assert_that(user_container.Principal, is_(user1))
+        assert_that(user_container.get_completed_item_count(), is_(0))
+        assert_that(user_container.get_completed_item(completable1), none())
+        assert_that(user_container.remove_item(completable1), is_(False))
 
         completed_item1 = CompletedItem(user1, completable1, now)
         user_container.add_completed_item(completed_item1)
-        assert_that(completed_item1, validly_provides(ICompletedItem))
-        assert_that(completed_item1, verifiably_provides(ICompletedItem))
+        assert_that(user_container.get_completed_item_count(), is_(1))
+        assert_that(user_container.get_completed_item(completable1), is_(completed_item1))
 
+        # Idempotent
+        user_container.add_completed_item(completed_item1)
+        assert_that(user_container.get_completed_item_count(), is_(1))
+        assert_that(user_container.get_completed_item(completable1), is_(completed_item1))
+
+
+        # Second user
+        user_container2 = component.queryMultiAdapter((user2, completion_context),
+                                                      IPrincipalCompletedItemContainer)
+
+        with assert_raises(AssertionError):
+            # Add to incorrect container
+            user_container2.add_completed_item(completed_item1)
+
+        # Multiple
+        completed_item2 = CompletedItem(user1, completable2, now)
+        user_container.add_completed_item(completed_item2)
+        assert_that(user_container.get_completed_item_count(), is_(2))
+
+        completed_item3 = CompletedItem(user2, completable2, now)
+        user_container2.add_completed_item(completed_item3)
+        assert_that(user_container2.get_completed_item_count(), is_(1))
+
+        # Validate counts
+        assert_that(completed_container.get_completed_item_count(completable1), is_(1))
+        assert_that(completed_container.get_completed_item_count(completable2), is_(2))
+
+        # Removal
+        remove_count = completed_container.remove_item(completable1)
+        assert_that(remove_count, is_(1))
+        assert_that(completed_container.get_completed_item_count(completable1), is_(0))
+        assert_that(completed_container.get_completed_item_count(completable2), is_(2))
+
+        assert_that(user_container.get_completed_item_count(), is_(1))
+        assert_that(user_container.get_completed_item(completable1), none())
+
+        assert_that(user_container2.get_completed_item_count(), is_(1))
+        assert_that(user_container2.get_completed_item(completable1), none())
+
+        # Removal of second item
+        remove_count = completed_container.remove_item(completable2)
+        assert_that(remove_count, is_(2))
+        assert_that(completed_container.get_completed_item_count(completable1), is_(0))
+        assert_that(completed_container.get_completed_item_count(completable2), is_(0))
+
+        assert_that(user_container.get_completed_item_count(), is_(0))
+        assert_that(user_container.get_completed_item(completable2), none())
+
+        assert_that(user_container2.get_completed_item_count(), is_(0))
+        assert_that(user_container2.get_completed_item(completable2), none())
