@@ -19,6 +19,8 @@ import unittest
 
 from zope import interface
 
+from zope.security.interfaces import IPrincipal
+
 from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import IUserProgressUpdatedEvent
@@ -27,8 +29,6 @@ from nti.contenttypes.completion.interfaces import UserProgressUpdatedEvent
 
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
-from nti.coremetadata.interfaces import IUser
-
 
 class TestEvents(unittest.TestCase):
 
@@ -36,9 +36,9 @@ class TestEvents(unittest.TestCase):
 
     def test_progress_updated_event(self):
 
-        @interface.implementer(IUser)
+        @interface.implementer(IPrincipal)
         class FakeUser(object):
-            __name__ = username = u'fakeuser'
+            id = title = description = u'fakeuser'
 
         @interface.implementer(ICompletableItem)
         class FakeCompletableItem(object):

@@ -8,4 +8,19 @@
     <include package="zope.component" />
 	<include package="zope.security" />
 
+	<include package="zope.annotation" />
+
+    <adapter factory=".adapters.CompletedItemContainerFactory"
+             provides=".interfaces.ICompletedItemContainer"
+             for=".interfaces.ICompletionContext" />
+
+    <adapter factory=".adapters.CompletableItemContainerFactory"
+             provides=".interfaces.ICompletableItemContainer"
+             for=".interfaces.ICompletionContext" />
+
+    <adapter factory=".adapters._context_to_principal_container"
+             provides=".interfaces.IPrincipalCompletedItemContainer"
+             for="zope.security.interfaces.IPrincipal
+                 .interfaces.ICompletionContext" />
+
 </configure>
