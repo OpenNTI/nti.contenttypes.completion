@@ -41,6 +41,8 @@ from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContai
 
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
+from nti.wref.interfaces import IWeakRef
+
 
 @interface.implementer(IPrincipal)
 class MockUser(object):
@@ -49,11 +51,30 @@ class MockUser(object):
         self.id = self.title = self.description = username
 
 
+@interface.implementer(IWeakRef)
+class _IdentityWref(object):
+
+    def __init__(self, gbe):
+        self.gbe = gbe
+
+    def __call__(self):
+        return self.gbe
+
+    def __eq__(self, unused_other):
+        return True
+
+    def __hash__(self):
+        return 42
+
+
 @interface.implementer(ICompletableItem)
 class MockCompletableItem(object):
 
     def __init__(self, ntiid):
         self.ntiid = ntiid
+
+    def __conform__(self, unused_iface):
+        return _IdentityWref(self)
 
 
 @interface.implementer(ICompletionContext, IAttributeAnnotatable)
@@ -92,19 +113,17 @@ class TestCompletion(unittest.TestCase):
         assert_that(user_container2, is_not(user_container))
 
     def test_completed(self):
+        """
+        Test completed item storage, access, and removal.
+        """
         now = datetime.utcnow()
         user1 = MockUser(u'user1')
         user2 = MockUser(u'user2')
         completable1 = MockCompletableItem('completable1')
         completable2 = MockCompletableItem('completable2')
-
         completion_context = MockCompletionContext()
 
         # Base cases
-        completable_container = ICompletableItemContainer(completion_context)
-        assert_that(completable_container.get_optional_item_count(), is_(0))
-        assert_that(completable_container.get_required_item_count(), is_(0))
-
         completed_container = ICompletedItemContainer(completion_context)
         assert_that(completed_container, not_none())
         assert_that(completed_container, has_length(0))
@@ -119,10 +138,14 @@ class TestCompletion(unittest.TestCase):
         assert_that(user_container.get_completed_item(completable1), none())
         assert_that(user_container.remove_item(completable1), is_(False))
 
-        completed_item1 = CompletedItem(user1, completable1, now)
+        completed_item1 = CompletedItem(Principal=user1, Item=completable1, CompletedDate=now)
         user_container.add_completed_item(completed_item1)
         assert_that(user_container.get_completed_item_count(), is_(1))
         assert_that(user_container.get_completed_item(completable1), is_(completed_item1))
+        assert_that(completed_item1, validly_provides(ICompletedItem))
+        assert_that(completed_item1, verifiably_provides(ICompletedItem))
+        assert_that(completed_item1.Item, is_(completable1))
+        assert_that(completed_item1._item, not_none())
 
         # Idempotent
         user_container.add_completed_item(completed_item1)
@@ -139,11 +162,11 @@ class TestCompletion(unittest.TestCase):
             user_container2.add_completed_item(completed_item1)
 
         # Multiple
-        completed_item2 = CompletedItem(user1, completable2, now)
+        completed_item2 = CompletedItem(Principal=user1, Item=completable2, CompletedDate=now)
         user_container.add_completed_item(completed_item2)
         assert_that(user_container.get_completed_item_count(), is_(2))
 
-        completed_item3 = CompletedItem(user2, completable2, now)
+        completed_item3 = CompletedItem(Principal=user2, Item=completable2, CompletedDate=now)
         user_container2.add_completed_item(completed_item3)
         assert_that(user_container2.get_completed_item_count(), is_(1))
 
@@ -174,3 +197,99 @@ class TestCompletion(unittest.TestCase):
 
         assert_that(user_container2.get_completed_item_count(), is_(0))
         assert_that(user_container2.get_completed_item(completable2), none())
+
+    def test_completable(self):
+        """
+        Test completable item references, functions.
+        """
+        completable1 = MockCompletableItem('completable1')
+        completable2 = MockCompletableItem('completable2')
+        completable3 = MockCompletableItem('completable3')
+
+        completion_context = MockCompletionContext()
+
+        # Base cases
+        completable_container = ICompletableItemContainer(completion_context)
+        assert_that(completable_container.get_optional_item_count(), is_(0))
+        assert_that(completable_container.get_required_item_count(), is_(0))
+
+        # Add items (removing items that do not exist
+        completable_container.add_required_item(completable1)
+        assert_that(completable_container.remove_optional_item(completable2), is_(False))
+        assert_that(completable_container.remove_required_item(completable3), is_(False))
+        assert_that(completable_container.get_optional_item_count(), is_(0))
+        assert_that(completable_container.get_required_item_count(), is_(1))
+
+        completable_container.add_required_item(completable2)
+        assert_that(completable_container.remove_optional_item(completable2), is_(False))
+        assert_that(completable_container.remove_required_item(completable3), is_(False))
+        assert_that(completable_container.get_optional_item_count(), is_(0))
+        assert_that(completable_container.get_required_item_count(), is_(2))
+
+        completable_container.add_optional_item(completable3)
+        assert_that(completable_container.remove_optional_item(completable2), is_(False))
+        assert_that(completable_container.remove_required_item(completable3), is_(False))
+        assert_that(completable_container.get_optional_item_count(), is_(1))
+        assert_that(completable_container.get_required_item_count(), is_(2))
+
+        assert_that(completable_container.is_item_required(completable1),
+                    is_(True))
+        assert_that(completable_container.is_item_required(completable2),
+                    is_(True))
+        assert_that(completable_container.is_item_required(completable3),
+                    is_(False))
+
+        assert_that(completable_container.is_item_optional(completable1),
+                    is_(False))
+        assert_that(completable_container.is_item_optional(completable2),
+                    is_(False))
+        assert_that(completable_container.is_item_optional(completable3),
+                    is_(True))
+
+        # Remove items
+        assert_that(completable_container.remove_required_item(completable1), is_(True))
+        assert_that(completable_container.get_optional_item_count(), is_(1))
+        assert_that(completable_container.get_required_item_count(), is_(1))
+
+        assert_that(completable_container.is_item_required(completable1),
+                    is_(False))
+        assert_that(completable_container.is_item_required(completable2),
+                    is_(True))
+        assert_that(completable_container.is_item_optional(completable3),
+                    is_(True))
+
+        assert_that(completable_container.remove_required_item(completable1), is_(False))
+        assert_that(completable_container.remove_required_item(completable2), is_(True))
+        assert_that(completable_container.get_optional_item_count(), is_(1))
+        assert_that(completable_container.get_required_item_count(), is_(0))
+
+        assert_that(completable_container.is_item_required(completable1),
+                    is_(False))
+        assert_that(completable_container.is_item_required(completable2),
+                    is_(False))
+        assert_that(completable_container.is_item_optional(completable3),
+                    is_(True))
+
+        assert_that(completable_container.remove_required_item(completable1), is_(False))
+        assert_that(completable_container.remove_required_item(completable2), is_(False))
+        assert_that(completable_container.remove_optional_item(completable3), is_(True))
+        assert_that(completable_container.get_optional_item_count(), is_(0))
+        assert_that(completable_container.get_required_item_count(), is_(0))
+
+        assert_that(completable_container.is_item_required(completable1),
+                    is_(False))
+        assert_that(completable_container.is_item_required(completable2),
+                    is_(False))
+        assert_that(completable_container.is_item_optional(completable3),
+                    is_(False))
+
+        # Transfer from optional -> required (and reverse)
+        completable_container.add_required_item(completable2)
+        assert_that(completable_container.get_optional_item_count(), is_(0))
+        assert_that(completable_container.get_required_item_count(), is_(1))
+        completable_container.add_optional_item(completable2)
+        assert_that(completable_container.get_optional_item_count(), is_(1))
+        assert_that(completable_container.get_required_item_count(), is_(0))
+        completable_container.add_required_item(completable2)
+        assert_that(completable_container.get_optional_item_count(), is_(0))
+        assert_that(completable_container.get_required_item_count(), is_(1))

@@ -21,6 +21,8 @@ from nti.schema.fieldproperty import createDirectFieldProperties
 
 from nti.schema.schema import SchemaConfigured
 
+from nti.wref.interfaces import IWeakRef
+
 logger = __import__('logging').getLogger(__name__)
 
 
@@ -76,11 +78,17 @@ class CompletedItem(SchemaConfigured):
 
     __parent__ = None
     __name__ = None
+    _item = None
 
     user = alias('Principal')
 
-    def __init__(self, principal, item, completed_date):
-        super(CompletedItem, self).__init__()
-        self.Principal = principal
-        self.Item = item
-        self.CompletedDate = completed_date
+    def __init__(self, Item=None, *args, **kwargs):
+        SchemaConfigured.__init__(self, *args, **kwargs)
+        self._item = IWeakRef(Item)
+
+    @property
+    def Item(self):
+        result = None
+        if self._item is not None:
+            result = self._item()
+        return result
