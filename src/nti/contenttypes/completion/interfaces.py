@@ -25,12 +25,13 @@ from zope.security.interfaces import IPrincipal
 
 from nti.property.property import alias
 
-from nti.schema.field import Set
 from nti.schema.field import Bool
 from nti.schema.field import Object
 from nti.schema.field import Number
+from nti.schema.field import TextLine
 from nti.schema.field import ValidDatetime
 from nti.schema.field import ValidTextLine
+from nti.schema.field import UniqueIterable
 
 
 class ICompletableItem(interface.Interface):
@@ -77,7 +78,7 @@ class ICompletableItemCompletionPolicy(interface.Interface):
 
     def is_complete(progress):
         """
-        Determines if the given progress is enough for the item to be
+        Determines if the given :class:`IProgress` is enough for the item to be
         considered complete.
         """
 
@@ -97,7 +98,7 @@ class ICompletionContextAggregateCompletionPolicy(ICompletionContextCompletionPo
     have been completed.
     """
 
-    Count = Number(title=u"The number of items",
+    count = Number(title=u"The number of items",
                    description=u"""The number of items, that once complete by
                    a user will enable the overarching context to be considered
                    complete""",
@@ -105,7 +106,7 @@ class ICompletionContextAggregateCompletionPolicy(ICompletionContextCompletionPo
                    min=0.0,
                    default=None)
 
-    Percentage = Number(title=u"Percentage of required items",
+    percentage = Number(title=u"Percentage of required items",
                         description=u"""The percentage of required items, that
                         once complete by a user will enable the overarching
                         context to be considered complete""",
@@ -121,9 +122,10 @@ class ICompletableItemDefaultRequiredPolicy(interface.Interface):
     objects that, by default, are required for completion.
     """
 
-    mime_types = Set(title=u"mime types of required objects",
-                     description=u"""The mime types of objects that should be
-                     required, by default, for the completion context.""")
+    mime_types = UniqueIterable(value_type=TextLine(title=u'the mimetype'),
+                                title=u"mime types of required objects",
+                                description=u"""The mime types of objects that should be
+                                             required, by default, for the completion context.""")
 
 
 class ICompletableItemContainer(interface.Interface):
