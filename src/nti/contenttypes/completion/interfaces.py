@@ -224,16 +224,22 @@ class ICompletedItemContainer(IContainer):
 
     contains(IPrincipalCompletedItemContainer)
 
-    def get_user_completed_items(principal):
+    def get_completed_items(item):
         """
-        Return the :class:`IPrincipalCompletedItemContainer` for the given
-        principal.
+        Return all :class:`ICompletedItem` objects for the given
+        :class:`ICompletableItem`.
+        """
+
+    def get_completed_item_count(item):
+        """
+        Return the number of :class:`ICompletedItem` objects for the given
+        :class:`ICompletableItem`.
         """
 
     def remove_item(item):
         """
-        Remove all :class:`ICompletedItem` referenced by the given
-        :class:`ICompletableItem`.
+        Remove all :class:`ICompletedItem` objects referenced by the given
+        :class:`ICompletableItem`, returning the count of removed items.
         """
 
 
