@@ -62,7 +62,7 @@ setup(
         'setuptools',
         'six',
         'ZODB',
-        'zope.annotations',
+        'zope.annotation',
         'zope.component',
         'zope.container',
         'zope.interface',
