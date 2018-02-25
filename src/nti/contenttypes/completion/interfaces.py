@@ -83,37 +83,34 @@ class ICompletableItemCompletionPolicy(interface.Interface):
         """
 
 
+class ICompletableItemAggregateCompletionPolicy(ICompletableItemCompletionPolicy):
+    """
+    A :class:`ICompletableItemCompletionPolicy` that bases completion based
+    on how many (or what fraction of) progress has been made.
+    """
+
+    count = Number(title=u"The count",
+                   description=u"""The absolute progress that must be made to
+                   be considered complete.""",
+                   required=False,
+                   min=0.0,
+                   default=None)
+
+    percentage = Number(title=u"Percentage",
+                        description=u"""The percentage of progress that must
+                        be made for this context to be considered complete.""",
+                        required=False,
+                        min=0.0,
+                        max=1.0,
+                        default=None)
+
+
 class ICompletionContextCompletionPolicy(ICompletableItemCompletionPolicy):
     """
     A :class:`ICompletableItemCompletionPolicy` for :class:`ICompletionContext`
     objects that determines the conditions in which the
     :class:`ICompletionContext' object can be considered complete.
     """
-
-
-class ICompletionContextAggregateCompletionPolicy(ICompletionContextCompletionPolicy):
-    """
-    A :class:`ICompletionContextCompletionPolicy` that bases completion based
-    on how many (or what fraction of) referenced :class:`ICompletableItem` items
-    have been completed.
-    """
-
-    count = Number(title=u"The number of items",
-                   description=u"""The number of items, that once complete by
-                   a user will enable the overarching context to be considered
-                   complete""",
-                   required=False,
-                   min=0.0,
-                   default=None)
-
-    percentage = Number(title=u"Percentage of required items",
-                        description=u"""The percentage of required items, that
-                        once complete by a user will enable the overarching
-                        context to be considered complete""",
-                        required=False,
-                        min=0.0,
-                        max=1.0,
-                        default=None)
 
 
 class ICompletableItemDefaultRequiredPolicy(interface.Interface):

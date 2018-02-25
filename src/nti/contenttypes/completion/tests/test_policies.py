@@ -22,10 +22,10 @@ import unittest
 from zope.schema.interfaces import ValidationError
 
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
-from nti.contenttypes.completion.interfaces import ICompletionContextAggregateCompletionPolicy
+from nti.contenttypes.completion.interfaces import ICompletableItemAggregateCompletionPolicy
 
 from nti.contenttypes.completion.policies import CompletableItemDefaultRequiredPolicy
-from nti.contenttypes.completion.policies import CompletionContextAggregateCompletionPolicy
+from nti.contenttypes.completion.policies import CompletableItemAggregateCompletionPolicy
 
 from nti.contenttypes.completion.progress import Progress
 
@@ -37,11 +37,11 @@ class TestPolicies(unittest.TestCase):
     layer = SharedConfiguringTestLayer
 
     def test_context_completion_policy(self):
-        completion_policy = CompletionContextAggregateCompletionPolicy()
+        completion_policy = CompletableItemAggregateCompletionPolicy()
         assert_that(completion_policy,
-                    validly_provides(ICompletionContextAggregateCompletionPolicy))
+                    validly_provides(ICompletableItemAggregateCompletionPolicy))
         assert_that(completion_policy,
-                    verifiably_provides(ICompletionContextAggregateCompletionPolicy))
+                    verifiably_provides(ICompletableItemAggregateCompletionPolicy))
         assert_that(completion_policy.count, none())
         assert_that(completion_policy.percentage, none())
 

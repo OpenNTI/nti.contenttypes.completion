@@ -13,7 +13,7 @@ from BTrees.OOBTree import OOTreeSet
 from zope import interface
 
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
-from nti.contenttypes.completion.interfaces import ICompletionContextAggregateCompletionPolicy
+from nti.contenttypes.completion.interfaces import ICompletableItemAggregateCompletionPolicy
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
@@ -24,11 +24,11 @@ from nti.schema.schema import SchemaConfigured
 logger = __import__('logging').getLogger(__name__)
 
 
-@interface.implementer(ICompletionContextAggregateCompletionPolicy)
-class CompletionContextAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeObject,
-                                                 SchemaConfigured):
+@interface.implementer(ICompletableItemAggregateCompletionPolicy)
+class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeObject,
+                                               SchemaConfigured):
 
-    createDirectFieldProperties(ICompletionContextAggregateCompletionPolicy)
+    createDirectFieldProperties(ICompletableItemAggregateCompletionPolicy)
 
     def is_complete(self, progress):
         """
