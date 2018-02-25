@@ -243,9 +243,9 @@ class ICompletedItemContainer(IContainer):
 
 class IProgress(interface.Interface):
     """
-    Indicates the progress made on underlying :class:`ICompletableItem`
-    content, generally only useful to inform on progress towards
-    completing an item that is not yet completed.
+    A transient object that indicates the progress made on an underlying
+    :class:`ICompletableItem` content, generally only useful to inform on
+    progress towards completing an item that is not yet completed.
     """
 
     AbsoluteProgress = Number(title=u"A number indicating the absolute progress made on an item.",
@@ -257,7 +257,7 @@ class IProgress(interface.Interface):
     HasProgress = Bool(title=u"Indicates the user has some progress on this item.",
                        default=False)
 
-    ntiid = ValidTextLine(title=u"The ntiid of the :class:`ICompletableItem.",
+    NTIID = ValidTextLine(title=u"The ntiid of the :class:`ICompletableItem.",
                           required=True)
 
     LastModified = ValidDatetime(title=u"The date of the last progress.",

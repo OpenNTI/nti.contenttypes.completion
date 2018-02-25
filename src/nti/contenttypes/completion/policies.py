@@ -39,9 +39,18 @@ class CompletionContextAggregateCompletionPolicy(PersistentCreatedAndModifiedTim
         # If both fields are set, we check each
         result = True
         if self.count:
-            result = progress.AbsoluteProgress > self.count
-        if self.percentage:
-            result = progress.AbsoluteProgress / progress.Percentage > self.percentage
+            result = progress.AbsoluteProgress >= self.count
+        if self.percentage and result:
+            if progress.MaxPossibleProgress:
+                ratio = progress.AbsoluteProgress / progress.MaxPossibleProgress
+                result = ratio >= self.percentage
+            else:
+                # This case should be avoided...
+                # Required percentage but not given a denominator
+                logger.warn('No MaxPossibleProgress given when computing completion (%s/%s)',
+                            progress.AbsoluteProgress,
+                            progress.MaxPossibleProgress)
+                result = False
         return result
 
 
