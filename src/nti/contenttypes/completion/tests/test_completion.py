@@ -28,12 +28,9 @@ from zope import component
 
 from zope.annotation.interfaces import IAttributeAnnotatable
 
-from zope.security.interfaces import IPrincipal
-
 from nti.contenttypes.completion.completion import CompletedItem
 
 from nti.contenttypes.completion.interfaces import ICompletedItem
-from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
@@ -42,10 +39,22 @@ from nti.contenttypes.completion.interfaces import ICompletionContextCompletionP
 
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
+from nti.contenttypes.completion.tests.interfaces import ITestPrincipal
+from nti.contenttypes.completion.tests.interfaces import ITestCompletableItem
+
+from nti.externalization.externalization import to_external_object
+from nti.externalization.externalization import StandardExternalFields
+
+from nti.externalization.internalization import find_factory_for
+
 from nti.wref.interfaces import IWeakRef
 
+CLASS = StandardExternalFields.CLASS
+ITEMS = StandardExternalFields.ITEMS
+MIMETYPE = StandardExternalFields.MIMETYPE
 
-@interface.implementer(IPrincipal)
+
+@interface.implementer(ITestPrincipal)
 class MockUser(object):
 
     def __init__(self, username):
@@ -68,7 +77,7 @@ class _IdentityWref(object):
         return 42
 
 
-@interface.implementer(ICompletableItem)
+@interface.implementer(ITestCompletableItem)
 class MockCompletableItem(object):
 
     def __init__(self, ntiid):
@@ -86,6 +95,23 @@ class MockCompletionContext(object):
 class TestCompletion(unittest.TestCase):
 
     layer = SharedConfiguringTestLayer
+
+    def test_externalization(self):
+        now = datetime.utcnow()
+        user1 = MockUser(u'user1')
+        completable1 = MockCompletableItem('completable1')
+        completed_item = CompletedItem(Principal=user1,
+                                       Item=completable1,
+                                       CompletedDate=now)
+        ext_obj = to_external_object(completed_item)
+        assert_that(ext_obj[CLASS], is_('CompletedItem'))
+        assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.completeditem'))
+        assert_that(ext_obj['CompletedDate'], not_none())
+        assert_that(ext_obj['Principal'], not_none())
+        assert_that(ext_obj['Item'], not_none())
+
+        factory = find_factory_for(ext_obj)
+        assert_that(factory, none())
 
     def test_adapters(self):
         user1 = MockUser(u'user1')

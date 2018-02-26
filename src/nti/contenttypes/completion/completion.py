@@ -78,13 +78,18 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
 
 @interface.implementer(ICompletedItem)
 class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaConfigured):
+
     createDirectFieldProperties(ICompletedItem)
+
+    __external_can_create__ = False
 
     __parent__ = None
     __name__ = None
     _item = None
 
     user = alias('Principal')
+
+    mimeType = mime_type = "application/vnd.nextthought.completion.completeditem"
 
     def __init__(self, Item=None, *args, **kwargs):
         SchemaConfigured.__init__(self, *args, **kwargs)

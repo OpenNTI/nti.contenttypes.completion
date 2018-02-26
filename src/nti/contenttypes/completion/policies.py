@@ -30,6 +30,8 @@ class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeO
 
     createDirectFieldProperties(ICompletableItemAggregateCompletionPolicy)
 
+    mimeType = mime_type = "application/vnd.nextthought.completion.aggregatecompletionpolicy"
+
     def is_complete(self, progress):
         """
         Determines if the given :class:`IProgress` is enough for the item to be
@@ -59,6 +61,8 @@ class CompletableItemDefaultRequiredPolicy(PersistentCreatedAndModifiedTimeObjec
                                            SchemaConfigured):
 
     createDirectFieldProperties(ICompletableItemDefaultRequiredPolicy)
+
+    mimeType = mime_type = "application/vnd.nextthought.completion.defaultrequiredpolicy"
 
     def __init__(self, *args, **kwargs):
         super(CompletableItemDefaultRequiredPolicy, self).__init__(*args, **kwargs)
