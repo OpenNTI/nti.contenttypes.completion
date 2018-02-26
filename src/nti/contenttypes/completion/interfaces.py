@@ -113,13 +113,26 @@ class ICompletionContextCompletionPolicy(ICompletableItemCompletionPolicy):
     """
 
 
+class ICompletionContextCompletionPolicyContainer(IContainer):
+    """
+    For a :class:`ICompletionContext`, stores the context's
+    :class:`ICompletableItemCompletionPolicy` as well as a mapping of
+    this context's :class:`ICompletableItem` completion policies.
+    """
+
+    context_policy = Object(ICompletionContextCompletionPolicy,
+                            title=u"The context's completion policy",
+                            description=u"The principal who completed the item",
+                            required=False)
+
+
 class ICompletableItemDefaultRequiredPolicy(interface.Interface):
     """
     A policy for :class:`ICompletionContext` objects that defines
     objects that, by default, are required for completion.
     """
 
-    mime_types = UniqueIterable(value_type=TextLine(title=u'the mimetype'),
+    mime_types = UniqueIterable(value_type=TextLine(title=u'the mimetypes'),
                                 title=u"mime types of required objects",
                                 description=u"""The mime types of objects that should be
                                              required, by default, for the completion context.""")

@@ -29,6 +29,7 @@ from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
 from nti.schema.fieldproperty import createDirectFieldProperties
 
@@ -38,6 +39,7 @@ from nti.wref.interfaces import IWeakRef
 
 COMPLETED_ITEM_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletedItemContainer'
 COMPLETABLE_ITEM_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletableItemContainer'
+COMPLETION_CONTAINER_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletionContextCompletionPolicyContainer'
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -166,6 +168,20 @@ _CompletableItemContainerFactory = an_factory(CompletableItemContainer,
                                               COMPLETABLE_ITEM_ANNOTATION_KEY)
 
 
+@component.adapter(ICompletionContext)
+@interface.implementer(ICompletionContextCompletionPolicyContainer)
+class CompletionContextCompletionPolicyContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
+                                                 SchemaConfigured):
+    """
+    Stores mappings of ntiid -> ICompletionPolicy for a user.
+    """
+    createDirectFieldProperties(ICompletionContextCompletionPolicyContainer)
+
+
+_CompletionContextCompletionPolicyContainerFactory = an_factory(CompletionContextCompletionPolicyContainer,
+                                                                COMPLETION_CONTAINER_ANNOTATION_KEY)
+
+
 def _create_annotation(obj, factory):
     result = factory(obj)
     if IConnection(result, None) is None:
@@ -183,6 +199,10 @@ def CompletedItemContainerFactory(obj):
 
 def CompletableItemContainerFactory(obj):
     return _create_annotation(obj, _CompletableItemContainerFactory)
+
+
+def CompletionContextCompletionPolicyContainerFactory(obj):
+    return _create_annotation(obj, _CompletionContextCompletionPolicyContainerFactory)
 
 
 @component.adapter(IPrincipal, ICompletionContext)

@@ -38,6 +38,7 @@ from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
@@ -111,6 +112,11 @@ class TestCompletion(unittest.TestCase):
         user_container2 = component.queryMultiAdapter((user2, completion_context),
                                                      IPrincipalCompletedItemContainer)
         assert_that(user_container2, is_not(user_container))
+
+        policy_container = ICompletionContextCompletionPolicyContainer(completion_context)
+        assert_that(policy_container, not_none())
+        assert_that(policy_container, validly_provides(ICompletionContextCompletionPolicyContainer))
+        assert_that(policy_container.context_policy, none())
 
     def test_completed(self):
         """
