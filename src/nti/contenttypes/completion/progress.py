@@ -23,3 +23,7 @@ logger = __import__('logging').getLogger(__name__)
 class Progress(SchemaConfigured):
 
     createDirectFieldProperties(IProgress)
+
+    __external_can_create__ = False
+
+    mimeType = mime_type = "application/vnd.nextthought.completion.progress"

@@ -9,8 +9,10 @@ from __future__ import absolute_import
 
 from hamcrest import is_
 from hamcrest import none
+from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
+from hamcrest import contains_inanyorder
 
 from nose.tools import assert_raises
 
@@ -31,10 +33,93 @@ from nti.contenttypes.completion.progress import Progress
 
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
+from nti.externalization.externalization import to_external_object
+from nti.externalization.externalization import StandardExternalFields
+
+from nti.externalization.internalization import find_factory_for
+from nti.externalization.internalization import update_from_external_object
+
+CLASS = StandardExternalFields.CLASS
+ITEMS = StandardExternalFields.ITEMS
+MIMETYPE = StandardExternalFields.MIMETYPE
+
 
 class TestPolicies(unittest.TestCase):
 
     layer = SharedConfiguringTestLayer
+
+    def test_progress_externalization(self):
+        progress = Progress(NTIID=u'ntiid',
+                            AbsoluteProgress=10,
+                            MaxPossibleProgress=25)
+        ext_obj = to_external_object(progress)
+        assert_that(ext_obj[CLASS], is_('Progress'))
+        assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.progress'))
+        assert_that(ext_obj['AbsoluteProgress'], is_(10))
+        assert_that(ext_obj['NTIID'], is_(u'ntiid'))
+        assert_that(ext_obj['MaxPossibleProgress'], is_(25))
+        assert_that(ext_obj['Completed'], is_(False))
+        assert_that(ext_obj['CompletedDate'], none())
+
+        factory = find_factory_for(ext_obj)
+        assert_that(factory, none())
+
+    def test_policy_externalization(self):
+        completion_policy = CompletableItemAggregateCompletionPolicy()
+        ext_obj = to_external_object(completion_policy)
+        assert_that(ext_obj[CLASS], is_('CompletableItemAggregateCompletionPolicy'))
+        assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.aggregatecompletionpolicy'))
+        assert_that(ext_obj['count'], none())
+        assert_that(ext_obj['percentage'], none())
+
+        factory = find_factory_for(ext_obj)
+        assert_that(factory, not_none())
+        new_io = factory()
+        update_from_external_object(new_io, ext_obj)
+        assert_that(new_io.count, none())
+        assert_that(new_io.percentage, none())
+
+        new_io.count = 50
+        new_io.percentage = .5
+        ext_obj = to_external_object(new_io)
+        assert_that(ext_obj['count'], is_(50))
+        assert_that(ext_obj['percentage'], is_(.5))
+
+        ext_obj = to_external_object(new_io)
+        factory = find_factory_for(ext_obj)
+        assert_that(factory, not_none())
+        new_io = factory()
+        update_from_external_object(new_io, ext_obj)
+        assert_that(new_io.count, is_(50))
+        assert_that(new_io.percentage, is_(.5))
+
+    def test_default_policy_externalization(self):
+        completable_policy = CompletableItemDefaultRequiredPolicy()
+        ext_obj = to_external_object(completable_policy)
+        assert_that(ext_obj[CLASS], is_('CompletableItemDefaultRequiredPolicy'))
+        assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.defaultrequiredpolicy'))
+        assert_that(ext_obj['mime_types'], has_length(0))
+
+        factory = find_factory_for(ext_obj)
+        assert_that(factory, not_none())
+        new_io = factory()
+        update_from_external_object(new_io, ext_obj)
+        assert_that(new_io.mime_types, has_length(0))
+
+        new_io.mime_types.add(u'mime_type1')
+        new_io.mime_types.add(u'mime_type2')
+        ext_obj = to_external_object(new_io)
+        assert_that(ext_obj[CLASS], is_('CompletableItemDefaultRequiredPolicy'))
+        assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.defaultrequiredpolicy'))
+        assert_that(ext_obj['mime_types'], has_length(2))
+        assert_that(ext_obj['mime_types'], contains_inanyorder(u'mime_type1', u'mime_type2'))
+
+        factory = find_factory_for(ext_obj)
+        assert_that(factory, not_none())
+        new_io = factory()
+        update_from_external_object(new_io, ext_obj)
+        assert_that(new_io.mime_types, has_length(2))
+        assert_that(new_io.mime_types, contains_inanyorder(u'mime_type1', u'mime_type2'))
 
     def test_context_completion_policy(self):
         completion_policy = CompletableItemAggregateCompletionPolicy()

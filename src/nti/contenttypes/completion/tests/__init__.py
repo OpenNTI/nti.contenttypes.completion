@@ -15,12 +15,12 @@ from nti.testing.layers import ConfiguringLayerMixin
 
 import zope.testing.cleanup
 
-
 class SharedConfiguringTestLayer(ZopeComponentLayer,
                                  GCLayerMixin,
                                  ConfiguringLayerMixin):
 
-    set_up_packages = ('nti.contenttypes.completion',)
+    set_up_packages = ('nti.contenttypes.completion',
+                       'nti.contenttypes.completion.tests')
 
     @classmethod
     def setUp(cls):
