@@ -25,12 +25,13 @@ from zope.security.interfaces import IPrincipal
 
 from nti.property.property import alias
 
-from nti.schema.field import Set
 from nti.schema.field import Bool
 from nti.schema.field import Object
 from nti.schema.field import Number
+from nti.schema.field import TextLine
 from nti.schema.field import ValidDatetime
 from nti.schema.field import ValidTextLine
+from nti.schema.field import UniqueIterable
 
 
 class ICompletableItem(interface.Interface):
@@ -77,9 +78,31 @@ class ICompletableItemCompletionPolicy(interface.Interface):
 
     def is_complete(progress):
         """
-        Determines if the given progress is enough for the item to be
+        Determines if the given :class:`IProgress` is enough for the item to be
         considered complete.
         """
+
+
+class ICompletableItemAggregateCompletionPolicy(ICompletableItemCompletionPolicy):
+    """
+    A :class:`ICompletableItemCompletionPolicy` that bases completion based
+    on how many (or what fraction of) progress has been made.
+    """
+
+    count = Number(title=u"The count",
+                   description=u"""The absolute progress that must be made to
+                   be considered complete.""",
+                   required=False,
+                   min=0.0,
+                   default=None)
+
+    percentage = Number(title=u"Percentage",
+                        description=u"""The percentage of progress that must
+                        be made for this context to be considered complete.""",
+                        required=False,
+                        min=0.0,
+                        max=1.0,
+                        default=None)
 
 
 class ICompletionContextCompletionPolicy(ICompletableItemCompletionPolicy):
@@ -90,29 +113,17 @@ class ICompletionContextCompletionPolicy(ICompletableItemCompletionPolicy):
     """
 
 
-class ICompletionContextAggregateCompletionPolicy(ICompletionContextCompletionPolicy):
+class ICompletionContextCompletionPolicyContainer(IContainer):
     """
-    A :class:`ICompletionContextCompletionPolicy` that bases completion based
-    on how many (or what fraction of) referenced :class:`ICompletableItem` items
-    have been completed.
+    For a :class:`ICompletionContext`, stores the context's
+    :class:`ICompletableItemCompletionPolicy` as well as a mapping of
+    this context's :class:`ICompletableItem` completion policies.
     """
 
-    Count = Number(title=u"The number of items",
-                   description=u"""The number of items, that once complete by
-                   a user will enable the overarching context to be considered
-                   complete""",
-                   required=False,
-                   min=0.0,
-                   default=None)
-
-    Percentage = Number(title=u"Percentage of required items",
-                        description=u"""The percentage of required items, that
-                        once complete by a user will enable the overarching
-                        context to be considered complete""",
-                        required=False,
-                        min=0.0,
-                        max=1.0,
-                        default=None)
+    context_policy = Object(ICompletionContextCompletionPolicy,
+                            title=u"The context's completion policy",
+                            description=u"The principal who completed the item",
+                            required=False)
 
 
 class ICompletableItemDefaultRequiredPolicy(interface.Interface):
@@ -121,9 +132,10 @@ class ICompletableItemDefaultRequiredPolicy(interface.Interface):
     objects that, by default, are required for completion.
     """
 
-    mime_types = Set(title=u"mime types of required objects",
-                     description=u"""The mime types of objects that should be
-                     required, by default, for the completion context.""")
+    mime_types = UniqueIterable(value_type=TextLine(title=u'the mimetypes'),
+                                title=u"mime types of required objects",
+                                description=u"""The mime types of objects that should be
+                                             required, by default, for the completion context.""")
 
 
 class ICompletableItemContainer(interface.Interface):
@@ -241,9 +253,9 @@ class ICompletedItemContainer(IContainer):
 
 class IProgress(interface.Interface):
     """
-    Indicates the progress made on underlying :class:`ICompletableItem`
-    content, generally only useful to inform on progress towards
-    completing an item that is not yet completed.
+    A transient object that indicates the progress made on an underlying
+    :class:`ICompletableItem` content, generally only useful to inform on
+    progress towards completing an item that is not yet completed.
     """
 
     AbsoluteProgress = Number(title=u"A number indicating the absolute progress made on an item.",
@@ -255,7 +267,7 @@ class IProgress(interface.Interface):
     HasProgress = Bool(title=u"Indicates the user has some progress on this item.",
                        default=False)
 
-    ntiid = ValidTextLine(title=u"The ntiid of the :class:`ICompletableItem.",
+    NTIID = ValidTextLine(title=u"The ntiid of the :class:`ICompletableItem.",
                           required=True)
 
     LastModified = ValidDatetime(title=u"The date of the last progress.",

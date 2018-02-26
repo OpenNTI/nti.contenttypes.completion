@@ -8,12 +8,16 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+from zope.container.contained import Contained
+
 from zope import interface
 
 from nti.contenttypes.completion.interfaces import ICompletedItem
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
 
 from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeContainer
+
+from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
 from nti.property.property import alias
 
@@ -73,7 +77,7 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
 
 
 @interface.implementer(ICompletedItem)
-class CompletedItem(SchemaConfigured):
+class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaConfigured):
     createDirectFieldProperties(ICompletedItem)
 
     __parent__ = None

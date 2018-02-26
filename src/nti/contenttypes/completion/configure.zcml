@@ -18,6 +18,10 @@
              provides=".interfaces.ICompletableItemContainer"
              for=".interfaces.ICompletionContext" />
 
+    <adapter factory=".adapters.CompletionContextCompletionPolicyContainerFactory"
+             provides=".interfaces.ICompletionContextCompletionPolicyContainer"
+             for=".interfaces.ICompletionContext" />
+
     <adapter factory=".adapters._context_to_principal_container"
              provides=".interfaces.IPrincipalCompletedItemContainer"
              for="zope.security.interfaces.IPrincipal
