@@ -69,7 +69,7 @@ class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     """
 
 
-class ICompletableItemCompletionPolicy(interface.Interface):
+class ICompletableItemCompletionPolicy(IContained):
     """
     A policy for :class:`ICompletableItem` objects that determines the
     conditions in which the :class:`ICompletableItem' object can be
