@@ -14,8 +14,6 @@ from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
 
-from nose.tools import assert_raises
-
 from nti.testing.matchers import validly_provides
 from nti.testing.matchers import verifiably_provides
 
@@ -198,7 +196,7 @@ class TestCompletion(unittest.TestCase):
         user_container2 = component.queryMultiAdapter((user2, completion_context),
                                                       IPrincipalCompletedItemContainer)
 
-        with assert_raises(AssertionError):
+        with self.assertRaises(AssertionError):
             # Add to incorrect container
             user_container2.add_completed_item(completed_item1)
 

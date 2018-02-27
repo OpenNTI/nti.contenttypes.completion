@@ -14,8 +14,6 @@ from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import contains_inanyorder
 
-from nose.tools import assert_raises
-
 from nti.testing.matchers import validly_provides
 from nti.testing.matchers import verifiably_provides
 
@@ -176,10 +174,10 @@ class TestPolicies(unittest.TestCase):
         assert_that(completion_policy.is_complete(little_progress), is_(False))
         assert_that(completion_policy.is_complete(much_progress), is_(True))
 
-        with assert_raises(ValidationError):
+        with self.assertRaises(ValidationError):
             completion_policy.count = -1
         for new_percentage in (-1, 2, 100):
-            with assert_raises(ValidationError):
+            with self.assertRaises(ValidationError):
                 completion_policy.percentage = new_percentage
 
     def test_completable_policy(self):
