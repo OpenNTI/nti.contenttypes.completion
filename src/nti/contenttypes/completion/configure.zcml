@@ -11,6 +11,7 @@
 
 	<include package="zope.annotation" />
 
+	<include package="nti.wref" />
 	<include package="nti.mimetype" />
 
     <adapter factory=".adapters.CompletedItemContainerFactory"
