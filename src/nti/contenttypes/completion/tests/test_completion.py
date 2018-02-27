@@ -21,10 +21,7 @@ import unittest
 
 from datetime import datetime
 
-from zope import interface
 from zope import component
-
-from zope.annotation.interfaces import IAttributeAnnotatable
 
 from nti.contenttypes.completion.completion import CompletedItem
 
@@ -37,57 +34,18 @@ from nti.contenttypes.completion.interfaces import ICompletionContextCompletionP
 
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
-from nti.contenttypes.completion.tests.interfaces import ITestPrincipal
-from nti.contenttypes.completion.tests.interfaces import ITestCompletableItem
+from nti.contenttypes.completion.tests.test_models import MockUser
+from nti.contenttypes.completion.tests.test_models import MockCompletableItem
+from nti.contenttypes.completion.tests.test_models import MockCompletionContext
 
 from nti.externalization.externalization import to_external_object
 from nti.externalization.externalization import StandardExternalFields
 
 from nti.externalization.internalization import find_factory_for
 
-from nti.wref.interfaces import IWeakRef
-
 CLASS = StandardExternalFields.CLASS
 ITEMS = StandardExternalFields.ITEMS
 MIMETYPE = StandardExternalFields.MIMETYPE
-
-
-@interface.implementer(ITestPrincipal)
-class MockUser(object):
-
-    def __init__(self, username):
-        self.id = self.title = self.description = username
-
-
-@interface.implementer(IWeakRef)
-class _IdentityWref(object):
-
-    def __init__(self, gbe):
-        self.gbe = gbe
-
-    def __call__(self):
-        return self.gbe
-
-    def __eq__(self, unused_other):  # pragma: no cover
-        return True
-
-    def __hash__(self):  # pragma: no cover
-        return 42
-
-
-@interface.implementer(ITestCompletableItem)
-class MockCompletableItem(object):
-
-    def __init__(self, ntiid):
-        self.ntiid = ntiid
-
-    def __conform__(self, unused_iface):
-        return _IdentityWref(self)
-
-
-@interface.implementer(ICompletionContext, IAttributeAnnotatable)
-class MockCompletionContext(object):
-    pass
 
 
 class TestCompletion(unittest.TestCase):

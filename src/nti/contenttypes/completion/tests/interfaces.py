@@ -11,6 +11,7 @@ from __future__ import absolute_import
 from zope.security.interfaces import IPrincipal
 
 from nti.contenttypes.completion.interfaces import ICompletableItem
+from nti.contenttypes.completion.interfaces import ICompletionContext
 
 
 class ITestPrincipal(IPrincipal):
@@ -24,4 +25,10 @@ class ITestCompletableItem(ICompletableItem):
     """
     A interface for items that may be completable once certain conditions are
     met.
+    """
+
+
+class ITestCompletionContext(ICompletionContext):
+    """
+    A test completion context interface.
     """

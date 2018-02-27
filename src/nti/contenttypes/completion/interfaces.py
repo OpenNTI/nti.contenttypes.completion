@@ -120,7 +120,7 @@ class ICompletionContextCompletionPolicyContainer(IContainer):
     this context's :class:`ICompletableItem` completion policies.
     """
 
-    context_policy = Object(ICompletionContextCompletionPolicy,
+    context_policy = Object(ICompletableItemCompletionPolicy,
                             title=u"The context's completion policy",
                             description=u"The principal who completed the item",
                             required=False)

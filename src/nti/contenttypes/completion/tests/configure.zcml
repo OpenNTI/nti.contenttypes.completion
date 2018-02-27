@@ -11,6 +11,6 @@
     <ext:registerAutoPackageIO
         root_interfaces=".interfaces.ITestPrincipal
                          .interfaces.ITestCompletableItem"
-        modules=".test_completion" />
+        modules=".test_models" />
 
 </configure>
