@@ -78,7 +78,6 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
 
 @interface.implementer(ICompletedItem)
 class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaConfigured):
-
     createDirectFieldProperties(ICompletedItem)
 
     __external_can_create__ = False
@@ -91,6 +90,7 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaCon
 
     mimeType = mime_type = "application/vnd.nextthought.completion.completeditem"
 
+    # pylint: disable=keyword-arg-before-vararg,super-init-not-called
     def __init__(self, Item=None, *args, **kwargs):
         SchemaConfigured.__init__(self, *args, **kwargs)
         self._item = IWeakRef(Item)
