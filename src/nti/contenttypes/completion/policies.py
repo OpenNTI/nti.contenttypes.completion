@@ -12,6 +12,8 @@ from BTrees.OOBTree import OOTreeSet
 
 from zope import interface
 
+from zope.container.contained import Contained
+
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemAggregateCompletionPolicy
 
@@ -26,7 +28,8 @@ logger = __import__('logging').getLogger(__name__)
 
 @interface.implementer(ICompletableItemAggregateCompletionPolicy)
 class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeObject,
-                                               SchemaConfigured):
+                                               SchemaConfigured,
+                                               Contained):
 
     createDirectFieldProperties(ICompletableItemAggregateCompletionPolicy)
 
