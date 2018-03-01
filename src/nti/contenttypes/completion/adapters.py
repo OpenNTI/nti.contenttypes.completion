@@ -103,6 +103,9 @@ class CompletableItemContainer(PersistentCreatedAndModifiedTimeObject,
         self._required = OOBTree()
         self._optional = OOBTree()
 
+    def get_required_keys(self):
+        return tuple(self._required.keys())
+
     def add_required_item(self, item):
         """
         Add a :class:`ICompletableItem` to this context as a required item.
@@ -115,11 +118,18 @@ class CompletableItemContainer(PersistentCreatedAndModifiedTimeObject,
         Remove a :class:`ICompletableItem` as a required item.
         """
         try:
-            self._required.pop(item.ntiid)
+            key = item.ntiid
+        except AttributeError:
+            key = item
+        try:
+            self._required.pop(key)
             result = True
         except KeyError:
             result = False
         return result
+
+    def get_optional_keys(self):
+        return tuple(self._optional.keys())
 
     def add_optional_item(self, item):
         """
@@ -133,7 +143,11 @@ class CompletableItemContainer(PersistentCreatedAndModifiedTimeObject,
         Remove a :class:`ICompletableItem` as an optional item.
         """
         try:
-            self._optional.pop(item.ntiid)
+            key = item.ntiid
+        except AttributeError:
+            key = item
+        try:
+            self._optional.pop(key)
             result = True
         except KeyError:
             result = False
