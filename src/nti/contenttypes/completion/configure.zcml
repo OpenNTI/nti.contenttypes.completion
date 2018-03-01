@@ -22,6 +22,10 @@
              provides=".interfaces.ICompletableItemContainer"
              for=".interfaces.ICompletionContext" />
 
+    <adapter factory=".adapters.CompletableItemDefaultRequiredFactory"
+             provides=".interfaces.ICompletableItemDefaultRequiredPolicy"
+             for=".interfaces.ICompletionContext" />
+
     <adapter factory=".adapters.CompletionContextCompletionPolicyContainerFactory"
              provides=".interfaces.ICompletionContextCompletionPolicyContainer"
              for=".interfaces.ICompletionContext" />
