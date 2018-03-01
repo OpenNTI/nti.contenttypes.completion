@@ -22,6 +22,8 @@ from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.tests.interfaces import ITestPrincipal
 from nti.contenttypes.completion.tests.interfaces import ITestCompletableItem
 
+from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
+
 from nti.wref.interfaces import IWeakRef
 
 
@@ -49,17 +51,18 @@ class _IdentityWref(object):
 
 
 @interface.implementer(ITestCompletableItem)
-class MockCompletableItem(object):
+class MockCompletableItem(PersistentCreatedAndModifiedTimeObject):
 
     def __init__(self, ntiid):
         self.ntiid = ntiid
 
-    def __conform__(self, unused_iface):
-        return _IdentityWref(self)
+    def __conform__(self, iface):
+        if iface == IWeakRef:
+            return _IdentityWref(self)
 
 
 @interface.implementer(ICompletionContext, IAttributeAnnotatable)
-class MockCompletionContext(object):
+class MockCompletionContext(PersistentCreatedAndModifiedTimeObject):
     pass
 
 
