@@ -9,6 +9,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 from BTrees.OOBTree import OOBTree
+from BTrees.OOBTree import OOTreeSet
 
 from ZODB.interfaces import IConnection
 
@@ -29,6 +30,7 @@ from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
 from nti.schema.fieldproperty import createDirectFieldProperties
@@ -39,6 +41,7 @@ from nti.wref.interfaces import IWeakRef
 
 COMPLETED_ITEM_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletedItemContainer'
 COMPLETABLE_ITEM_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletableItemContainer'
+COMPLETABLE_ITEM_DEFAULT_REQUIRED_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletableItemDefaultRequiredPolicy'
 COMPLETION_CONTAINER_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletionContextCompletionPolicyContainer'
 
 logger = __import__('logging').getLogger(__name__)
@@ -103,6 +106,13 @@ class CompletableItemContainer(PersistentCreatedAndModifiedTimeObject,
         self._required = OOBTree()
         self._optional = OOBTree()
 
+    def _get_item_key(self, item):
+        try:
+            key = item.ntiid
+        except AttributeError:
+            key = item
+        return key
+
     def get_required_keys(self):
         return tuple(self._required.keys())
 
@@ -117,10 +127,7 @@ class CompletableItemContainer(PersistentCreatedAndModifiedTimeObject,
         """
         Remove a :class:`ICompletableItem` as a required item.
         """
-        try:
-            key = item.ntiid
-        except AttributeError:
-            key = item
+        key = self._get_item_key(item)
         try:
             self._required.pop(key)
             result = True
@@ -142,10 +149,7 @@ class CompletableItemContainer(PersistentCreatedAndModifiedTimeObject,
         """
         Remove a :class:`ICompletableItem` as an optional item.
         """
-        try:
-            key = item.ntiid
-        except AttributeError:
-            key = item
+        key = self._get_item_key(item)
         try:
             self._optional.pop(key)
             result = True
@@ -157,7 +161,8 @@ class CompletableItemContainer(PersistentCreatedAndModifiedTimeObject,
         """
         Returns a bool if the given :class:`ICompletableItem` is required.
         """
-        return item.ntiid in self._required
+        key = self._get_item_key(item)
+        return key in self._required
 
     def get_required_item_count(self):
         """
@@ -169,7 +174,8 @@ class CompletableItemContainer(PersistentCreatedAndModifiedTimeObject,
         """
         Returns a bool if the given :class:`ICompletableItem` is optional.
         """
-        return item.ntiid in self._optional
+        key = self._get_item_key(item)
+        return key in self._optional
 
     def get_optional_item_count(self):
         """
@@ -196,6 +202,24 @@ _CompletionContextCompletionPolicyContainerFactory = an_factory(CompletionContex
                                                                 COMPLETION_CONTAINER_ANNOTATION_KEY)
 
 
+@component.adapter(ICompletionContext)
+@interface.implementer(ICompletableItemDefaultRequiredPolicy)
+class CompletableItemDefaultRequiredPolicy(PersistentCreatedAndModifiedTimeObject,
+                                           SchemaConfigured):
+
+    createDirectFieldProperties(ICompletableItemDefaultRequiredPolicy)
+
+    mimeType = mime_type = "application/vnd.nextthought.completion.defaultrequiredpolicy"
+
+    def __init__(self, *args, **kwargs):
+        super(CompletableItemDefaultRequiredPolicy, self).__init__(*args, **kwargs)
+        self.mime_types = OOTreeSet()
+
+
+_CompletableItemDefaultRequiredFactory = an_factory(CompletableItemDefaultRequiredPolicy,
+                                                    COMPLETABLE_ITEM_DEFAULT_REQUIRED_ANNOTATION_KEY)
+
+
 def _create_annotation(obj, factory):
     result = factory(obj)
     if IConnection(result, None) is None:
@@ -217,6 +241,10 @@ def CompletableItemContainerFactory(obj):
 
 def CompletionContextCompletionPolicyContainerFactory(obj):
     return _create_annotation(obj, _CompletionContextCompletionPolicyContainerFactory)
+
+
+def CompletableItemDefaultRequiredFactory(obj):
+    return _create_annotation(obj, _CompletableItemDefaultRequiredFactory)
 
 
 @component.adapter(IPrincipal, ICompletionContext)

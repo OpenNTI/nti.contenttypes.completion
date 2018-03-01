@@ -21,10 +21,11 @@ import unittest
 
 from zope.schema.interfaces import ValidationError
 
+from nti.contenttypes.completion.adapters import CompletableItemDefaultRequiredPolicy
+
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemAggregateCompletionPolicy
 
-from nti.contenttypes.completion.policies import CompletableItemDefaultRequiredPolicy
 from nti.contenttypes.completion.policies import CompletableItemAggregateCompletionPolicy
 
 from nti.contenttypes.completion.progress import Progress
