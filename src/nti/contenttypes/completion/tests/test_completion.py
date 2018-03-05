@@ -100,8 +100,7 @@ class TestCompletion(unittest.TestCase):
                                                       IPrincipalCompletedItemContainer)
         assert_that(user_container2, is_not(user_container))
 
-        policy_container = ICompletionContextCompletionPolicyContainer(
-            completion_context)
+        policy_container = ICompletionContextCompletionPolicyContainer(completion_context)
         assert_that(policy_container, not_none())
         assert_that(policy_container,
                     validly_provides(ICompletionContextCompletionPolicyContainer))
@@ -227,6 +226,8 @@ class TestCompletion(unittest.TestCase):
 
         # Add items (removing items that do not exist
         completable_container.add_required_item(completable1)
+        assert_that(completable_container.get_required_keys(),
+                    has_length(1))
         assert_that(completable_container.remove_optional_item(completable2),
                     is_(False))
         assert_that(completable_container.remove_required_item(completable3),
@@ -243,6 +244,8 @@ class TestCompletion(unittest.TestCase):
         assert_that(completable_container.get_required_item_count(), is_(2))
 
         completable_container.add_optional_item(completable3)
+        assert_that(completable_container.get_optional_keys(),
+                    has_length(1))
         assert_that(completable_container.remove_optional_item(completable2),
                     is_(False))
         assert_that(completable_container.remove_required_item(completable3),
@@ -265,7 +268,7 @@ class TestCompletion(unittest.TestCase):
                     is_(True))
 
         # Remove items
-        assert_that(completable_container.remove_required_item(completable1),
+        assert_that(completable_container.remove_required_item('completable1'),
                     is_(True))
         assert_that(completable_container.get_optional_item_count(), is_(1))
         assert_that(completable_container.get_required_item_count(), is_(1))
