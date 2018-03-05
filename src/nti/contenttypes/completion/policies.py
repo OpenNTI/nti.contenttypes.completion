@@ -49,9 +49,9 @@ class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeO
             else:
                 # This case should be avoided...
                 # Required percentage but not given a denominator
-                logger.warn('No MaxPossibleProgress given when computing completion (%s/%s)',
-                            progress.AbsoluteProgress,
-                            progress.MaxPossibleProgress)
+                logger.warning('No MaxPossibleProgress given when computing completion (%s/%s)',
+                               progress.AbsoluteProgress,
+                               progress.MaxPossibleProgress)
                 result = False
         return result
 
