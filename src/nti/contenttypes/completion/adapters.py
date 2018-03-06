@@ -193,7 +193,7 @@ _CompletableItemContainerFactory = an_factory(CompletableItemContainer,
 class CompletionContextCompletionPolicyContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
                                                  SchemaConfigured):
     """
-    Stores mappings of ntiid -> ICompletionPolicy for a user.
+    Stores mappings of ntiid -> ICompletionPolicy for a completable item.
     """
     createDirectFieldProperties(ICompletionContextCompletionPolicyContainer)
 
@@ -251,10 +251,11 @@ def CompletableItemDefaultRequiredFactory(obj):
 @interface.implementer(IPrincipalCompletedItemContainer)
 def _context_to_principal_container(user, completion_context):
     completed_container = ICompletedItemContainer(completion_context)
-    user_id = IPrincipal(user).id
+    principal = IPrincipal(user)
+    user_id = principal.id
     try:
         result = completed_container[user_id]
     except KeyError:
-        result = PrincipalCompletedItemContainer(user)
+        result = PrincipalCompletedItemContainer(principal)
         completed_container[user_id] = result
     return result

@@ -259,10 +259,12 @@ class IProgress(interface.Interface):
     """
 
     AbsoluteProgress = Number(title=u"A number indicating the absolute progress made on an item.",
-                              default=0)
+                              default=None,
+                              required=False)
 
     MaxPossibleProgress = Number(title=u"A number indicating the max possible progress that could be made on an item. May be null.",
-                                 default=0)
+                                 default=None,
+                                 required=False)
 
     HasProgress = Bool(title=u"Indicates the user has some progress on this item.",
                        default=False)
