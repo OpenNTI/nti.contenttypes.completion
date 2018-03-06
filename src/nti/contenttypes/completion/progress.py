@@ -12,13 +12,15 @@ from zope import interface
 
 from nti.contenttypes.completion.interfaces import IProgress
 
+from nti.externalization.representation import WithRepr
+
 from nti.schema.fieldproperty import createDirectFieldProperties
 
 from nti.schema.schema import SchemaConfigured
 
 logger = __import__('logging').getLogger(__name__)
 
-
+@WithRepr
 @interface.implementer(IProgress)
 class Progress(SchemaConfigured):
 

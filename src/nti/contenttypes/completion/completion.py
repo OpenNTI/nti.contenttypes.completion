@@ -12,6 +12,8 @@ from zope.container.contained import Contained
 
 from zope import interface
 
+from zope.security.interfaces import IPrincipal
+
 from nti.contenttypes.completion.interfaces import ICompletedItem
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
 
@@ -41,7 +43,7 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
 
     def __init__(self, principal):
         super(PrincipalCompletedItemContainer, self).__init__()
-        self.Principal = principal
+        self.Principal = IPrincipal(principal)
 
     def add_completed_item(self, completed_item):
         """
@@ -91,9 +93,10 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaCon
     mimeType = mime_type = "application/vnd.nextthought.completion.completeditem"
 
     # pylint: disable=keyword-arg-before-vararg,super-init-not-called
-    def __init__(self, Item=None, *args, **kwargs):
+    def __init__(self, Principal=None, Item=None, *args, **kwargs):
         SchemaConfigured.__init__(self, *args, **kwargs)
         self._item = IWeakRef(Item)
+        self.Principal = IPrincipal(Principal)
 
     @property
     def Item(self):
