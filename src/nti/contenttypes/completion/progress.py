@@ -8,6 +8,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+from datetime import datetime
+
 from zope import interface
 
 from nti.contenttypes.completion.interfaces import IProgress
@@ -35,3 +37,14 @@ class Progress(SchemaConfigured):
 
     last_modified = alias('LastModified')
     ntiid = alias('NTIID')
+
+    def __init__(self, LastModified=None, *args, **kwargs):
+        last_mod = LastModified
+        if LastModified is not None:
+            try:
+                last_mod = datetime.utcfromtimestamp(LastModified)
+            except TypeError:
+                pass
+        kwargs['LastModified'] = last_mod
+        super(Progress, self).__init__(*args, **kwargs)
+
