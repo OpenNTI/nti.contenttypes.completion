@@ -14,6 +14,8 @@ from nti.contenttypes.completion.interfaces import IProgress
 
 from nti.externalization.representation import WithRepr
 
+from nti.property.property import alias
+
 from nti.schema.fieldproperty import createDirectFieldProperties
 
 from nti.schema.schema import SchemaConfigured
@@ -28,4 +30,8 @@ class Progress(SchemaConfigured):
 
     __external_can_create__ = False
 
+    __external_class_name__ = "Progress"
     mimeType = mime_type = "application/vnd.nextthought.completion.progress"
+
+    last_modified = alias('LastModified')
+    ntiid = alias('NTIID')
