@@ -132,6 +132,8 @@ class ICompletableItemDefaultRequiredPolicy(interface.Interface):
     objects that, by default, are required for completion.
     """
 
+    creator = interface.Attribute(u"The creator of this object.")
+
     mime_types = UniqueIterable(value_type=TextLine(title=u'the mimetypes'),
                                 title=u"mime types of required objects",
                                 description=u"""The mime types of objects that should be

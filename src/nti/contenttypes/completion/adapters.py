@@ -211,6 +211,8 @@ class CompletableItemDefaultRequiredPolicy(PersistentCreatedAndModifiedTimeObjec
 
     mimeType = mime_type = "application/vnd.nextthought.completion.defaultrequiredpolicy"
 
+    creator = None
+
     def __init__(self, *args, **kwargs):
         super(CompletableItemDefaultRequiredPolicy, self).__init__(*args, **kwargs)
         self.mime_types = OOTreeSet()
