@@ -86,15 +86,8 @@ class ICompletableItemCompletionPolicy(IContained):
 class ICompletableItemAggregateCompletionPolicy(ICompletableItemCompletionPolicy):
     """
     A :class:`ICompletableItemCompletionPolicy` that bases completion based
-    on how many (or what fraction of) progress has been made.
+    on what fraction of progress has been made.
     """
-
-    count = Number(title=u"The count",
-                   description=u"""The absolute progress that must be made to
-                   be considered complete.""",
-                   required=False,
-                   min=0.0,
-                   default=None)
 
     percentage = Number(title=u"Percentage",
                         description=u"""The percentage of progress that must
@@ -105,12 +98,13 @@ class ICompletableItemAggregateCompletionPolicy(ICompletableItemCompletionPolicy
                         default=None)
 
 
-class ICompletionContextCompletionPolicy(ICompletableItemCompletionPolicy):
+class ICompletionContextCompletionPolicy(interface.Interface):
     """
-    A :class:`ICompletableItemCompletionPolicy` for :class:`ICompletionContext`
-    objects that determines the conditions in which the
+    A marker interface for the :class:`ICompletableItemCompletionPolicy` for
+    :class:`ICompletionContext` objects that determines the conditions in which the
     :class:`ICompletionContext' object can be considered complete.
     """
+ICompletionContextCompletionPolicy.setTaggedValue('_ext_is_marker_interface', True)
 
 
 class ICompletionContextCompletionPolicyContainer(IContainer):
