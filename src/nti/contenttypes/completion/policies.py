@@ -38,11 +38,8 @@ class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeO
         considered complete.
         """
         # If nothing set, we return True
-        # If both fields are set, we check each
         result = True
-        if self.count:
-            result = progress.AbsoluteProgress >= self.count
-        if self.percentage and result:
+        if self.percentage:
             if progress.MaxPossibleProgress:
                 ratio = progress.AbsoluteProgress / progress.MaxPossibleProgress
                 result = ratio >= self.percentage

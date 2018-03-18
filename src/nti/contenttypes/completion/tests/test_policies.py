@@ -68,20 +68,16 @@ class TestPolicies(unittest.TestCase):
         ext_obj = to_external_object(completion_policy)
         assert_that(ext_obj[CLASS], is_('CompletableItemAggregateCompletionPolicy'))
         assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.aggregatecompletionpolicy'))
-        assert_that(ext_obj['count'], none())
         assert_that(ext_obj['percentage'], none())
 
         factory = find_factory_for(ext_obj)
         assert_that(factory, not_none())
         new_io = factory()
         update_from_external_object(new_io, ext_obj)
-        assert_that(new_io.count, none())
         assert_that(new_io.percentage, none())
 
-        new_io.count = 50
         new_io.percentage = .5
         ext_obj = to_external_object(new_io)
-        assert_that(ext_obj['count'], is_(50))
         assert_that(ext_obj['percentage'], is_(.5))
 
         ext_obj = to_external_object(new_io)
@@ -89,7 +85,6 @@ class TestPolicies(unittest.TestCase):
         assert_that(factory, not_none())
         new_io = factory()
         update_from_external_object(new_io, ext_obj)
-        assert_that(new_io.count, is_(50))
         assert_that(new_io.percentage, is_(.5))
 
     def test_default_policy_externalization(self):
@@ -126,7 +121,6 @@ class TestPolicies(unittest.TestCase):
                     validly_provides(ICompletableItemAggregateCompletionPolicy))
         assert_that(completion_policy,
                     verifiably_provides(ICompletableItemAggregateCompletionPolicy))
-        assert_that(completion_policy.count, none())
         assert_that(completion_policy.percentage, none())
 
         # No requirements set
@@ -150,16 +144,7 @@ class TestPolicies(unittest.TestCase):
         assert_that(completion_policy.is_complete(little_progress), is_(True))
         assert_that(completion_policy.is_complete(much_progress), is_(True))
 
-        # Count
-        completion_policy.count = 10
-        assert_that(completion_policy.is_complete(no_progress), is_(False))
-        assert_that(completion_policy.is_complete(some_progress1), is_(True))
-        assert_that(completion_policy.is_complete(some_progress2), is_(False))
-        assert_that(completion_policy.is_complete(little_progress), is_(False))
-        assert_that(completion_policy.is_complete(much_progress), is_(True))
-
         # Percentage
-        completion_policy.count = 0
         completion_policy.percentage = .50
         assert_that(completion_policy.is_complete(no_progress), is_(False))
         assert_that(completion_policy.is_complete(some_progress1), is_(False))
@@ -167,16 +152,6 @@ class TestPolicies(unittest.TestCase):
         assert_that(completion_policy.is_complete(little_progress), is_(False))
         assert_that(completion_policy.is_complete(much_progress), is_(True))
 
-        # Both
-        completion_policy.count = 10
-        assert_that(completion_policy.is_complete(no_progress), is_(False))
-        assert_that(completion_policy.is_complete(some_progress1), is_(False))
-        assert_that(completion_policy.is_complete(some_progress2), is_(False))
-        assert_that(completion_policy.is_complete(little_progress), is_(False))
-        assert_that(completion_policy.is_complete(much_progress), is_(True))
-
-        with self.assertRaises(ValidationError):
-            completion_policy.count = -1
         for new_percentage in (-1, 2, 100):
             with self.assertRaises(ValidationError):
                 completion_policy.percentage = new_percentage
