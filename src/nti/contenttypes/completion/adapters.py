@@ -30,6 +30,7 @@ from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
@@ -261,3 +262,10 @@ def _context_to_principal_container(user, completion_context):
         result = PrincipalCompletedItemContainer(principal)
         completed_container[user_id] = result
     return result
+
+
+@component.adapter(ICompletionContext)
+@interface.implementer(ICompletionContextCompletionPolicy)
+def _context_to_completion_policy(completion_context):
+    container = ICompletionContextCompletionPolicyContainer(completion_context)
+    return container.context_policy

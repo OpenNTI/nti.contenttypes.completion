@@ -30,8 +30,11 @@ from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
+
+from nti.contenttypes.completion.policies import CompletableItemAggregateCompletionPolicy
 
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
@@ -105,6 +108,14 @@ class TestCompletion(unittest.TestCase):
         assert_that(policy_container,
                     validly_provides(ICompletionContextCompletionPolicyContainer))
         assert_that(policy_container.context_policy, none())
+
+        context_policy = ICompletionContextCompletionPolicy(completion_context, None)
+        assert_that(context_policy, none())
+
+        completion_policy = CompletableItemAggregateCompletionPolicy()
+        policy_container.context_policy = completion_policy
+        context_policy = ICompletionContextCompletionPolicy(completion_context, None)
+        assert_that(context_policy, is_(completion_policy))
 
         default_required = ICompletableItemDefaultRequiredPolicy(completion_context)
         assert_that(default_required, not_none())
