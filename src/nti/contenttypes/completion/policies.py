@@ -12,6 +12,8 @@ from zope import interface
 
 from zope.container.contained import Contained
 
+from nti.contenttypes.completion.completion import CompletedItem
+
 from nti.contenttypes.completion.interfaces import ICompletableItemAggregateCompletionPolicy
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
@@ -37,18 +39,19 @@ class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeO
         Determines if the given :class:`IProgress` is enough for the item to be
         considered complete.
         """
-        # If nothing set, we return True
-        result = True
+        result = None
         if self.percentage:
-            if progress.MaxPossibleProgress:
+            if progress is not None and progress.MaxPossibleProgress:
                 ratio = progress.AbsoluteProgress / progress.MaxPossibleProgress
-                result = ratio >= self.percentage
+                if ratio >= self.percentage:
+                    result = CompletedItem(Item=progress.Item,
+                                           Principal=progress.User,
+                                           CompletedDate=progress.LastModified)
             else:
                 # This case should be avoided...
                 # Required percentage but not given a denominator
-                logger.warning('No MaxPossibleProgress given when computing completion (%s/%s)',
-                               progress.AbsoluteProgress,
-                               progress.MaxPossibleProgress)
-                result = False
+                if progress is not None:
+                    logger.warning('No MaxPossibleProgress given when computing completion (%s/%s)',
+                                   progress.AbsoluteProgress,
+                                   progress.MaxPossibleProgress)
         return result
-
