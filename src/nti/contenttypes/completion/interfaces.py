@@ -57,7 +57,8 @@ class ICompletedItem(IContained):
                   required=True)
 
     CompletedDate = ValidDatetime(title=u"The completed date",
-                                  description=u"The date on which the item was completed by the user",
+                                  description=u"""The date on which the item
+                                  was completed by the user""",
                                   required=True)
 
 
@@ -67,6 +68,18 @@ class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     :class:`ICompletableItem` objects (defined by a
     :class:`ICompletionContextCompletionPolicy`).
     """
+
+
+class ICompletableItemProvider(interface.Interface):
+    """
+    An intended subscriber provider of possible :class:`ICompletableItem` for
+    a :class:`ICompletionContext`.
+    """
+
+    def iter_items(self):
+        """
+        A generator of :class:`ICompletableItem` objects.
+        """
 
 
 class ICompletableItemCompletionPolicy(IContained):
@@ -79,7 +92,7 @@ class ICompletableItemCompletionPolicy(IContained):
     def is_complete(progress):
         """
         Determines if the given :class:`IProgress` is enough for the item to be
-        considered complete.
+        considered complete. If complete, will return a :class:`ICompletedItem`.
         """
 
 
@@ -92,10 +105,10 @@ class ICompletableItemAggregateCompletionPolicy(ICompletableItemCompletionPolicy
     percentage = Number(title=u"Percentage",
                         description=u"""The percentage of progress that must
                         be made for this context to be considered complete.""",
-                        required=False,
+                        required=True,
                         min=0.0,
                         max=1.0,
-                        default=None)
+                        default=1.0)
 
 
 class ICompletionContextCompletionPolicy(interface.Interface):
@@ -267,6 +280,12 @@ class IProgress(interface.Interface):
 
     NTIID = ValidTextLine(title=u"The ntiid of the :class:`ICompletableItem.",
                           required=True)
+
+    Item = Object(ICompletableItem, title=u"Completable item", required=True)
+    Item.setTaggedValue('_ext_excluded_out', True)
+
+    User = Object(IPrincipal, title=u"principal", required=True)
+    User.setTaggedValue('_ext_excluded_out', True)
 
     LastModified = ValidDatetime(title=u"The date of the last progress.",
                                  required=False)

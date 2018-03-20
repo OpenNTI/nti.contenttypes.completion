@@ -10,8 +10,6 @@ from __future__ import absolute_import
 
 from zope import component
 
-from nti.contenttypes.completion.completion import CompletedItem
-
 from nti.contenttypes.completion.interfaces import IProgress
 from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
@@ -19,7 +17,7 @@ from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContai
 logger = __import__('logging').getLogger(__name__)
 
 
-def update_completion(obj, ntiid, user, context, created=None):
+def update_completion(obj, ntiid, user, context):
     """
     For the given object and user, update the completed state for the
     completion context based on the adapted :class:`IProgress`, if
@@ -29,7 +27,6 @@ def update_completion(obj, ntiid, user, context, created=None):
     :param ntiid: the ntiid of the completable item
     :param user: the user who has updated progress on the item
     :param context: the :class:`ICompletionContext`
-    :param created: (optional) the datetime to use if completed
     """
     principal_container = component.queryMultiAdapter((user, context),
                                                        IPrincipalCompletedItemContainer)
@@ -38,13 +35,9 @@ def update_completion(obj, ntiid, user, context, created=None):
                                            ICompletableItemCompletionPolicy)
         progress = component.queryMultiAdapter((user, obj, context),
                                                IProgress)
-        if progress and policy.is_complete(progress):
-            # Should lower this eventually
-            if created is None:
-                created = progress.LastModified
-            logger.info('Marking item complete (ntiid=%s) (user=%s)',
-                         ntiid, user.username)
-            completed_item = CompletedItem(Item=obj,
-                                           Principal=user,
-                                           CompletedDate=created)
-            principal_container[ntiid] = completed_item
+        if progress is not None:
+            completed_item = policy.is_complete(progress)
+            if completed_item is not None:
+                logger.info('Marking item complete (ntiid=%s) (user=%s)',
+                             ntiid, user.username)
+                principal_container[ntiid] = completed_item

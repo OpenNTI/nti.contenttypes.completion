@@ -12,6 +12,8 @@ from datetime import datetime
 
 from zope import interface
 
+from zope.security.interfaces import IPrincipal
+
 from nti.contenttypes.completion.interfaces import IProgress
 
 from nti.externalization.representation import WithRepr
@@ -38,13 +40,16 @@ class Progress(SchemaConfigured):
     last_modified = alias('LastModified')
     ntiid = alias('NTIID')
 
-    def __init__(self, LastModified=None, *args, **kwargs):
+    def __init__(self, User=None, LastModified=None, *args, **kwargs):
         last_mod = LastModified
         if LastModified is not None:
             try:
                 last_mod = datetime.utcfromtimestamp(LastModified)
             except TypeError:
                 pass
+        if User is not None:
+            User = IPrincipal(User)
+        kwargs['User'] = User
         kwargs['LastModified'] = last_mod
         super(Progress, self).__init__(*args, **kwargs)
 
