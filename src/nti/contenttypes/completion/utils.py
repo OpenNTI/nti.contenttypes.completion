@@ -11,8 +11,11 @@ from __future__ import absolute_import
 from zope import component
 
 from nti.contenttypes.completion.interfaces import IProgress
+from nti.contenttypes.completion.interfaces import ICompletableItem
+from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -41,3 +44,22 @@ def update_completion(obj, ntiid, user, context):
                 logger.info('Marking item complete (ntiid=%s) (user=%s)',
                              ntiid, user.username)
                 principal_container[ntiid] = completed_item
+
+
+def is_item_required(item, context):
+    """
+    Returns a bool if the given item is `required` in this
+    :class:`ICompletionContext`.
+    """
+    if not ICompletableItem.providedBy(item):
+        return False
+    required_container = ICompletableItemContainer(context)
+    default_policy = ICompletableItemDefaultRequiredPolicy(context)
+    if required_container.is_item_required(item):
+        result = True
+    elif required_container.is_item_optional(item):
+        result = False
+    else:
+        item_mime_type = getattr(item, 'mime_type', '')
+        result = item_mime_type in default_policy.mime_types
+    return result
