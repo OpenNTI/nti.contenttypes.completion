@@ -53,3 +53,9 @@ class Progress(SchemaConfigured):
         kwargs['LastModified'] = last_mod
         super(Progress, self).__init__(*args, **kwargs)
 
+    @property
+    def PercentageProgress(self):
+        if not self.MaxPossibleProgress:
+            return 0.0
+        return float(self.AbsoluteProgress) / float(self.MaxPossibleProgress)
+

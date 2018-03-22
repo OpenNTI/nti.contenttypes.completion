@@ -26,6 +26,7 @@ from zope.security.interfaces import IPrincipal
 from nti.property.property import alias
 
 from nti.schema.field import Bool
+from nti.schema.field import Float
 from nti.schema.field import Object
 from nti.schema.field import Number
 from nti.schema.field import TextLine
@@ -259,7 +260,6 @@ class ICompletedItemContainer(IContainer):
         :class:`ICompletableItem`, returning the count of removed items.
         """
 
-
 class IProgress(interface.Interface):
     """
     A transient object that indicates the progress made on an underlying
@@ -274,6 +274,12 @@ class IProgress(interface.Interface):
     MaxPossibleProgress = Number(title=u"A number indicating the max possible progress that could be made on an item. May be null.",
                                  default=None,
                                  required=False)
+
+    PercentageProgress = Float(title=u"A percentage measure of how much progress exists",
+                               required=True,
+                               readonly=True,
+                               min=0.0,
+                               max=1.0)
 
     HasProgress = Bool(title=u"Indicates the user has some progress on this item.",
                        default=False)
