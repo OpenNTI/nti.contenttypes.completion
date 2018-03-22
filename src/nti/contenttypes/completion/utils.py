@@ -11,6 +11,7 @@ from __future__ import absolute_import
 from zope import component
 
 from nti.contenttypes.completion.interfaces import IProgress
+from nti.contenttypes.completion.interfaces import ICompletedItem
 from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
@@ -41,8 +42,9 @@ def update_completion(obj, ntiid, user, context):
         if progress is not None:
             completed_item = policy.is_complete(progress)
             if completed_item is not None:
-                logger.info('Marking item complete (ntiid=%s) (user=%s)',
-                             ntiid, user.username)
+                logger.info('Marking item complete (ntiid=%s) (user=%s) (item=%s)',
+                             ntiid, user.username, completed_item)
+                assert ICompletedItem.providedBy(completed_item)
                 principal_container[ntiid] = completed_item
 
 
