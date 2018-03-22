@@ -57,7 +57,11 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
         Return the :class:`ICompletedItem` from this container given a
         :class:`ICompletableItem`, returning None if it does not exist.
         """
-        return self.get(item.ntiid)
+        try:
+            key = item.ntiid
+        except AttributeError:
+            key = ''
+        return self.get(key)
 
     def get_completed_item_count(self):
         """
