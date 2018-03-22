@@ -71,7 +71,7 @@ class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     """
 
 
-class ICompletableItemProvider(interface.Interface):
+class IRequiredCompletableItemProvider(interface.Interface):
     """
     An intended subscriber provider of possible :class:`ICompletableItem` for
     a :class:`ICompletionContext`.
