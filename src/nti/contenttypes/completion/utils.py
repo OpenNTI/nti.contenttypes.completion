@@ -76,6 +76,6 @@ def get_completed_item(user, context, item):
     :param context: the :class:`ICompletionContext`
     :param obj: the :class:`ICompletableItem`
     """
-    user_container = component.queryMultiAdapter((user, context),
-                                                 IPrincipalCompletedItemContainer)
+    user_container = component.getMultiAdapter((user, context),
+                                               IPrincipalCompletedItemContainer)
     return user_container.get_completed_item(item)
