@@ -82,6 +82,17 @@ class IRequiredCompletableItemProvider(interface.Interface):
         A generator of :class:`ICompletableItem` objects.
         """
 
+class ICompletedItemProvider(interface.Interface):
+    """
+    An object that can provide :class:`ICompletedItem`s.  Typcially
+    registered as a subscriber on :class:`IUser` and :class:`ICompletionContext`
+    """
+
+    def completed_items(self):
+        """
+        A generator of :class:`ICompletableItem` objects.
+        """
+
 
 class ICompletableItemCompletionPolicy(IContained):
     """
