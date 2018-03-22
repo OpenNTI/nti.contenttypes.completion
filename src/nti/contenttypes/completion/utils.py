@@ -50,6 +50,8 @@ def is_item_required(item, context):
     """
     Returns a bool if the given item is `required` in this
     :class:`ICompletionContext`.
+    :param item: the :class:`ICompletableItem`
+    :param context: the :class:`ICompletionContext`
     """
     if not ICompletableItem.providedBy(item):
         return False
@@ -63,3 +65,15 @@ def is_item_required(item, context):
         item_mime_type = getattr(item, 'mime_type', '')
         result = item_mime_type in default_policy.mime_types
     return result
+
+
+def get_completed_item(user, context, item):
+    """
+    Return the :class:`ICompletedItem` for the given context, user and item.
+    :param user: the user who has updated progress on the item
+    :param context: the :class:`ICompletionContext`
+    :param obj: the :class:`ICompletableItem`
+    """
+    user_container = component.queryMultiAdapter((user, context),
+                                                 IPrincipalCompletedItemContainer)
+    return user_container.get_completed_item(item)
