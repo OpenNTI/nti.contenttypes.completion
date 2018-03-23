@@ -329,11 +329,7 @@ class ICompletionContextProgress(IProgress):
                                   required=False)
 
 
-class IUserProgressUpdatedEvent(IObjectEvent):
-    """
-    Event to indicate a user has made progress on a :class:`ICompletableItem`,
-    within a :class:`ICompletionContext`.
-    """
+class IUserProgressEvent(IObjectEvent):
 
     user = Object(IPrincipal, title=u"principal", required=True)
 
@@ -346,12 +342,36 @@ class IUserProgressUpdatedEvent(IObjectEvent):
                      required=True)
 
 
-@interface.implementer(IUserProgressUpdatedEvent)
-class UserProgressUpdatedEvent(ObjectEvent):
+class IUserProgressUpdatedEvent(IUserProgressEvent):
+    """
+    Event to indicate a user has made progress on a :class:`ICompletableItem`,
+    within a :class:`ICompletionContext`.
+    """
+
+
+class IUserProgressRemovedEvent(IUserProgressEvent):
+    """
+    Event to indicate a user's progress on a :class:`ICompletableItem`
+    within a :class:`ICompletionContext` may have been reset/removed from
+    the system.
+    """
+
+
+class AbstractUserProgressEvent(ObjectEvent):
 
     item = alias('object')
 
     def __init__(self, obj, user, context):
-        super(UserProgressUpdatedEvent, self).__init__(obj)
+        super(AbstractUserProgressEvent, self).__init__(obj)
         self.user = user
         self.context = context
+
+
+@interface.implementer(IUserProgressUpdatedEvent)
+class UserProgressUpdatedEvent(AbstractUserProgressEvent):
+    pass
+
+
+@interface.implementer(IUserProgressRemovedEvent)
+class UserProgressRemovedEvent(AbstractUserProgressEvent):
+    pass
