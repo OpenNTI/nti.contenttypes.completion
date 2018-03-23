@@ -304,8 +304,21 @@ class IProgress(interface.Interface):
     User = Object(IPrincipal, title=u"principal", required=True)
     User.setTaggedValue('_ext_excluded_out', True)
 
+    CompletionContext = Object(ICompletionContext,
+                               title=u"Completion context",
+                               required=True)
+    CompletionContext.setTaggedValue('_ext_excluded_out', True)
+
     LastModified = ValidDatetime(title=u"The date of the last progress.",
                                  required=False)
+
+
+class ICompletionContextProgress(IProgress):
+    """
+    A transient object that indicates the progress made on an
+    :class:`ICompletionContext` object. This object will also describe if/when
+    the context was considered complete
+    """
 
     Completed = Bool(title=u"Indicates the user has completed this item.",
                      default=False)

@@ -15,6 +15,7 @@ from zope import interface
 from zope.security.interfaces import IPrincipal
 
 from nti.contenttypes.completion.interfaces import IProgress
+from nti.contenttypes.completion.interfaces import ICompletionContextProgress
 
 from nti.externalization.representation import WithRepr
 
@@ -59,3 +60,17 @@ class Progress(SchemaConfigured):
             return 0.0
         return float(self.AbsoluteProgress) / float(self.MaxPossibleProgress)
 
+
+@WithRepr
+@interface.implementer(ICompletionContextProgress)
+class CompletionContextProgress(Progress, SchemaConfigured):
+
+    createDirectFieldProperties(ICompletionContextProgress)
+
+    __external_can_create__ = False
+
+    __external_class_name__ = "CompletionContextProgress"
+    mimeType = mime_type = "application/vnd.nextthought.completion.completioncontextprogress"
+
+    def __init__(self, *args, **kwargs):
+        super(CompletionContextProgress, self).__init__(*args, **kwargs)

@@ -31,11 +31,13 @@ from nti.contenttypes.completion.interfaces import ICompletableItemAggregateComp
 from nti.contenttypes.completion.policies import CompletableItemAggregateCompletionPolicy
 
 from nti.contenttypes.completion.progress import Progress
+from nti.contenttypes.completion.progress import CompletionContextProgress
 
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
 from nti.contenttypes.completion.tests.test_models import MockUser
 from nti.contenttypes.completion.tests.test_models import MockCompletableItem
+from nti.contenttypes.completion.tests.test_models import MockCompletionContext
 
 from nti.externalization.externalization import to_external_object
 from nti.externalization.externalization import StandardExternalFields
@@ -56,15 +58,34 @@ class TestPolicies(unittest.TestCase):
         now = datetime.utcnow()
         user = MockUser(u'paper')
         item = MockCompletableItem(u'ntiid')
+        context = MockCompletionContext()
         progress = Progress(NTIID=u'ntiid',
                             AbsoluteProgress=10,
                             User=user,
                             Item=item,
+                            CompletionContext=context,
                             LastModified=now,
                             MaxPossibleProgress=25)
         ext_obj = to_external_object(progress)
         assert_that(ext_obj[CLASS], is_('Progress'))
         assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.progress'))
+        assert_that(ext_obj['AbsoluteProgress'], is_(10))
+        assert_that(ext_obj['NTIID'], is_(u'ntiid'))
+        assert_that(ext_obj['MaxPossibleProgress'], is_(25))
+
+        factory = find_factory_for(ext_obj)
+        assert_that(factory, none())
+
+        progress = CompletionContextProgress(NTIID=u'ntiid',
+                                             AbsoluteProgress=10,
+                                             User=user,
+                                             Item=item,
+                                             CompletionContext=context,
+                                             LastModified=now,
+                                             MaxPossibleProgress=25)
+        ext_obj = to_external_object(progress)
+        assert_that(ext_obj[CLASS], is_('CompletionContextProgress'))
+        assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.completioncontextprogress'))
         assert_that(ext_obj['AbsoluteProgress'], is_(10))
         assert_that(ext_obj['NTIID'], is_(u'ntiid'))
         assert_that(ext_obj['MaxPossibleProgress'], is_(25))
@@ -131,6 +152,7 @@ class TestPolicies(unittest.TestCase):
     def test_context_completion_policy(self):
         user = MockUser(u'girls')
         item = MockCompletableItem(u'ntiid')
+        context = MockCompletionContext()
         completion_policy = CompletableItemAggregateCompletionPolicy()
         assert_that(completion_policy,
                     validly_provides(ICompletableItemAggregateCompletionPolicy))
@@ -140,7 +162,8 @@ class TestPolicies(unittest.TestCase):
 
         # No requirements set
         now = datetime.utcnow()
-        kwargs = {'User': user, 'LastModified': now, 'Item': item}
+        kwargs = {'User': user, 'LastModified': now,
+                  'Item': item, 'CompletionContext': context}
         no_progress = Progress(NTIID=u'ntiid',
                                **kwargs)
         some_progress1 = Progress(NTIID=u'ntiid',
