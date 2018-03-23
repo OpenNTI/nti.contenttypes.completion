@@ -65,6 +65,7 @@ setup(
         'zope.annotation',
         'zope.component',
         'zope.container',
+        'zope.event',
         'zope.interface',
         'zope.security',
     ],

@@ -36,7 +36,7 @@ def update_completion(obj, ntiid, user, context):
                                                        IPrincipalCompletedItemContainer)
     if ntiid not in principal_container:
         policy = component.getMultiAdapter((obj, context),
-                                           ICompletableItemCompletionPolicy)
+                                        ICompletableItemCompletionPolicy)
         progress = component.queryMultiAdapter((user, obj, context),
                                                IProgress)
         if progress is not None:
