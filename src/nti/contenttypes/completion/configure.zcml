@@ -46,6 +46,7 @@
     <ext:registerAutoPackageIO
         root_interfaces=".interfaces.IProgress
                          .interfaces.ICompletedItem
+                         .interfaces.ICompletionContextProgress
                          .interfaces.ICompletableItemDefaultRequiredPolicy
                          .interfaces.ICompletableItemAggregateCompletionPolicy"
         modules=".adapters .policies .completion" />
