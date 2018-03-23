@@ -62,6 +62,10 @@ class ICompletedItem(IContained):
                                   was completed by the user""",
                                   required=True)
 
+    Success = Bool(title=u"Successfully completed",
+                   description=u"Indicates the user has successfully completed this item.",
+                   default=True)
+
 
 class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     """
