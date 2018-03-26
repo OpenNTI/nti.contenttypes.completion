@@ -9,10 +9,14 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 from zope import component
+from zope import interface
 
 from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import IUserProgressRemovedEvent
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyFactory
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
 from nti.contenttypes.completion.utils import update_completion
 
@@ -27,3 +31,18 @@ def _progress_removed(item, event):
                 event.user, item.ntiid)
     principal_container.remove_item(item)
     update_completion(item, item.ntiid, event.user, event.context)
+
+
+def completion_context_default_policy(completion_context, unused_event):
+    """
+    A subscriber that can be registered (as needed) to add a
+    :class:`ICompletionContextCompletionPolicy` to a :class:`ICompletionContext`.
+    """
+    policy_container = ICompletionContextCompletionPolicyContainer(completion_context)
+    if policy_container.context_policy is None:
+        policy_factory = component.queryUtility(ICompletionContextCompletionPolicyFactory)
+        if policy_factory is not None:
+            new_policy = policy_factory()
+            interface.alsoProvides(new_policy, ICompletionContextCompletionPolicy)
+            policy_container.context_policy = new_policy
+            new_policy.__parent__ = policy_container

@@ -62,4 +62,8 @@
     <!-- Subscribers -->
     <subscriber handler=".subscribers._progress_removed" />
 
+    <!-- Default 100% policy factory -->
+    <utility factory=".policies.CompletionContextCompletionPolicyFactory"
+             provides=".interfaces.ICompletionContextCompletionPolicyFactory" />
+
 </configure>

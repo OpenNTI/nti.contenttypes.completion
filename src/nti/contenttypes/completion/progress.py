@@ -56,9 +56,11 @@ class Progress(SchemaConfigured):
 
     @property
     def PercentageProgress(self):
-        if not self.MaxPossibleProgress:
-            return 0.0
-        return float(self.AbsoluteProgress) / float(self.MaxPossibleProgress)
+        try:
+            result = float(self.AbsoluteProgress) / float(self.MaxPossibleProgress)
+        except (TypeError, ZeroDivisionError):
+            result = None
+        return result
 
 
 @WithRepr

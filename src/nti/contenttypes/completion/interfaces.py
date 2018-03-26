@@ -136,6 +136,14 @@ class ICompletionContextCompletionPolicy(interface.Interface):
 ICompletionContextCompletionPolicy.setTaggedValue('_ext_is_marker_interface', True)
 
 
+class ICompletionContextCompletionPolicyFactory(interface.Interface):
+    """
+    A callable that can be registered to generate a
+    :class:`ICompletionContextCompletionPolicy` for on demand for a
+    :class:`ICompletionContext`.
+    """
+
+
 class ICompletionContextCompletionPolicyContainer(IContainer):
     """
     For a :class:`ICompletionContext`, stores the context's

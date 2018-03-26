@@ -15,6 +15,7 @@ from zope.container.contained import Contained
 from nti.contenttypes.completion.completion import CompletedItem
 
 from nti.contenttypes.completion.interfaces import ICompletableItemAggregateCompletionPolicy
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyFactory
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
@@ -55,3 +56,16 @@ class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeO
                                    progress.AbsoluteProgress,
                                    progress.MaxPossibleProgress)
         return result
+
+
+@interface.implementer(ICompletionContextCompletionPolicyFactory)
+class CompletionContextCompletionPolicyFactory(SchemaConfigured):
+    """
+    A :class:`ICompletionContextCompletionPolicyFactory` that returns a default
+    100% :class:`ICompletableItemAggregateCompletionPolicy`.
+    """
+
+    createDirectFieldProperties(ICompletionContextCompletionPolicyFactory)
+
+    def __call__(self):
+        return CompletableItemAggregateCompletionPolicy()
