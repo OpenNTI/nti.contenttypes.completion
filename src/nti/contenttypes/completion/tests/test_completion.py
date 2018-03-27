@@ -151,7 +151,8 @@ class TestCompletion(unittest.TestCase):
         assert_that(user_container.get_completed_item(completable1), none())
         assert_that(user_container.remove_item(completable1), is_(False))
 
-        completed_item1 = CompletedItem(Principal=user1, Item=completable1,
+        completed_item1 = CompletedItem(Principal=user1,
+                                        Item=completable1,
                                         CompletedDate=now)
         user_container.add_completed_item(completed_item1)
         assert_that(user_container.get_completed_item_count(), is_(1))
@@ -161,6 +162,7 @@ class TestCompletion(unittest.TestCase):
         assert_that(completed_item1, verifiably_provides(ICompletedItem))
         assert_that(completed_item1.Item, is_(completable1))
         assert_that(completed_item1._item, not_none())
+        assert_that(completed_item1.item_ntiid, is_(completable1.ntiid))
 
         # Idempotent
         user_container.add_completed_item(completed_item1)

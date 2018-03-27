@@ -36,7 +36,7 @@ def update_completion(obj, ntiid, user, context):
                                                        IPrincipalCompletedItemContainer)
     if ntiid not in principal_container:
         policy = component.getMultiAdapter((obj, context),
-                                        ICompletableItemCompletionPolicy)
+                                           ICompletableItemCompletionPolicy)
         progress = component.queryMultiAdapter((user, obj, context),
                                                IProgress)
         if progress is not None:
@@ -45,6 +45,7 @@ def update_completion(obj, ntiid, user, context):
                 logger.info('Marking item complete (ntiid=%s) (user=%s) (item=%s)',
                              ntiid, user.username, completed_item)
                 assert ICompletedItem.providedBy(completed_item)
+                assert completed_item.item_ntiid == ntiid
                 principal_container[ntiid] = completed_item
 
 
