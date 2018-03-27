@@ -69,3 +69,16 @@ class CompletionContextCompletionPolicyFactory(SchemaConfigured):
 
     def __call__(self):
         return CompletableItemAggregateCompletionPolicy()
+
+
+@interface.implementer(ICompletionContextCompletionPolicyFactory)
+class NoOpCompletionContextCompletionPolicyFactory(SchemaConfigured):
+    """
+    A :class:`ICompletionContextCompletionPolicyFactory` that returns no
+    policy, for those sites that do not want completion by default.
+    """
+
+    createDirectFieldProperties(ICompletionContextCompletionPolicyFactory)
+
+    def __call__(self):
+        return None
