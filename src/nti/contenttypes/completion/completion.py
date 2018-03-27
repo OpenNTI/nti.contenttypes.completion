@@ -50,7 +50,7 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
         Add a :class:`ICompletedItem` to the container.
         """
         assert completed_item.Principal == self.user
-        self[completed_item.Item.ntiid] = completed_item
+        self[completed_item.item_ntiid] = completed_item
 
     def get_completed_item(self, item):
         """
@@ -91,6 +91,7 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaCon
     __parent__ = None
     __name__ = None
     _item = None
+    _item_ntiid = None
 
     user = alias('Principal')
 
@@ -100,6 +101,7 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaCon
     def __init__(self, Principal=None, Item=None, *args, **kwargs):
         SchemaConfigured.__init__(self, *args, **kwargs)
         self._item = IWeakRef(Item)
+        self._item_ntiid = Item.ntiid
         self.Principal = IPrincipal(Principal)
 
     @property
@@ -108,3 +110,7 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaCon
         if self._item is not None:
             result = self._item()
         return result
+
+    @property
+    def item_ntiid(self):
+        return self._item_ntiid or self.__name__
