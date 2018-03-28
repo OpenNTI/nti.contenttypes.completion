@@ -387,3 +387,9 @@ class UserProgressUpdatedEvent(AbstractUserProgressEvent):
 @interface.implementer(IUserProgressRemovedEvent)
 class UserProgressRemovedEvent(AbstractUserProgressEvent):
     pass
+
+
+class ICourseCompletionProgress(interface.Interface):
+    """
+    Determines the completion progress for a user in a course
+    """

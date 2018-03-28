@@ -14,6 +14,11 @@
 	<include package="nti.wref" />
 	<include package="nti.mimetype" />
 
+    <adapter factory=".progress.CourseCompletionProgressFactory"
+             provides=".interfaces.ICourseCompletionProgress"
+             for="nti.dataserver.interfaces.IUser
+                  nti.contenttypes.courses.interfaces.ICourseInstance" />
+
     <adapter factory=".adapters.CompletedItemContainerFactory"
              provides=".interfaces.ICompletedItemContainer"
              for=".interfaces.ICompletionContext" />
