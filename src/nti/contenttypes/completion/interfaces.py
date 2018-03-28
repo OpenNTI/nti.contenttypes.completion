@@ -94,6 +94,10 @@ class ICompletedItemProvider(interface.Interface):
     registered as a subscriber on :class:`IUser` and :class:`ICompletionContext`
     """
 
+    last_modified = ValidDatetime(title=u"Last modified.",
+                                  description=u"The last modified of this completed item provider.",
+                                  required=True)
+
     def completed_items():
         """
         A generator of :class:`ICompletedItem` objects.
