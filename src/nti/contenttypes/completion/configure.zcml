@@ -37,7 +37,18 @@
     <adapter factory=".adapters._context_to_principal_container"
              provides=".interfaces.IPrincipalCompletedItemContainer"
              for="zope.security.interfaces.IPrincipal
-                 .interfaces.ICompletionContext" />
+                  .interfaces.ICompletionContext" />
+
+    <!-- ACL/ACE permissions -->
+    <include file="meta.zcml" package="zope.security" />
+
+    <permission
+	id="nti.actions.completion.viewprogress"
+	title="Read access to progress information" />
+
+    <permission
+	id="nti.actions.completion.listprogress"
+	title="List access to progress information" />
 
     <!-- Externalization -->
     <include package="nti.externalization" file="meta.zcml" />
