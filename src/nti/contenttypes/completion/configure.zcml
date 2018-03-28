@@ -40,8 +40,6 @@
                   .interfaces.ICompletionContext" />
 
     <!-- ACL/ACE permissions -->
-    <include file="meta.zcml" package="zope.security" />
-
     <permission
 	   id="nti.actions.completion.viewprogress"
 	   title="Read access to progress information" />
@@ -49,14 +47,6 @@
     <permission
 	   id="nti.actions.completion.listprogress"
 	   title="List access to progress information" />
-
-	<grant
-        permission="nti.actions.completion.viewprogress"
-        role="role:nti.dataserver.site-admin" />
-
-    <grant
-        permission="nti.actions.completion.listprogress"
-        role="role:nti.dataserver.site-admin" />
 
     <!-- Externalization -->
     <include package="nti.externalization" file="meta.zcml" />

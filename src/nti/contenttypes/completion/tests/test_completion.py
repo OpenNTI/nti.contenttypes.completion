@@ -68,8 +68,6 @@ class TestCompletion(unittest.TestCase):
         assert_that(ext_obj[MIMETYPE],
                     is_('application/vnd.nextthought.completion.completeditem'))
         assert_that(ext_obj['CompletedDate'], not_none())
-        assert_that(ext_obj['Principal'], not_none())
-        assert_that(ext_obj['Item'], not_none())
         assert_that(ext_obj['Success'], is_(True))
 
         factory = find_factory_for(ext_obj)
