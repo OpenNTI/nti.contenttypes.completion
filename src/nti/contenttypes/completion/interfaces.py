@@ -52,10 +52,12 @@ class ICompletedItem(IContained):
                        title=u'The principal',
                        description=u"The principal who completed the item",
                        required=True)
+    Principal.setTaggedValue('_ext_excluded_out', True)
 
     Item = Object(ICompletableItem,
                   title=u'The completable item',
                   required=True)
+    Item.setTaggedValue('_ext_excluded_out', True)
 
     CompletedDate = ValidDatetime(title=u"The completed date",
                                   description=u"""The date on which the item
@@ -88,13 +90,13 @@ class IRequiredCompletableItemProvider(interface.Interface):
 
 class ICompletedItemProvider(interface.Interface):
     """
-    An object that can provide :class:`ICompletedItem`s.  Typcially
+    An object that can provide :class:`ICompletedItem` objects.  Typically
     registered as a subscriber on :class:`IUser` and :class:`ICompletionContext`
     """
 
     def completed_items():
         """
-        A generator of :class:`ICompletableItem` objects.
+        A generator of :class:`ICompletedItem` objects.
         """
 
 
