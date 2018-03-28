@@ -23,6 +23,8 @@ from zope.interface.interfaces import IObjectEvent
 
 from zope.security.interfaces import IPrincipal
 
+from nti.base.interfaces import ILastModified
+
 from nti.property.property import alias
 
 from nti.schema.field import Bool
@@ -88,15 +90,12 @@ class IRequiredCompletableItemProvider(interface.Interface):
         A generator of :class:`ICompletableItem` objects based on the given user.
         """
 
-class ICompletedItemProvider(interface.Interface):
+
+class ICompletedItemProvider(ILastModified):
     """
     An object that can provide :class:`ICompletedItem` objects.  Typically
     registered as a subscriber on :class:`IUser` and :class:`ICompletionContext`
     """
-
-    last_modified = ValidDatetime(title=u"Last modified.",
-                                  description=u"The last modified of this completed item provider.",
-                                  required=True)
 
     def completed_items():
         """
