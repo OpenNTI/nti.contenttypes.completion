@@ -76,3 +76,11 @@ class CompletionContextProgress(Progress, SchemaConfigured):
 
     def __init__(self, *args, **kwargs):
         super(CompletionContextProgress, self).__init__(*args, **kwargs)
+
+    @property
+    def Completed(self):
+        return self.CompletedItem is not None
+
+    @property
+    def CompletedDate(self):
+        return getattr(self.CompletedItem, 'CompletedDate', None)

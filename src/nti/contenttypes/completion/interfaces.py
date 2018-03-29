@@ -337,6 +337,10 @@ class ICompletionContextProgress(IProgress):
     the context was considered complete
     """
 
+    CompletedItem = Object(ICompletedItem,
+                           title=u"The completed item for this context, if applicable",
+                           required=False)
+
     Completed = Bool(title=u"Indicates the user has completed this item.",
                      default=False)
 
