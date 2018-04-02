@@ -17,6 +17,7 @@ from hamcrest import assert_that
 from nti.testing.matchers import validly_provides
 from nti.testing.matchers import verifiably_provides
 
+import fudge
 import unittest
 
 from datetime import datetime
@@ -44,6 +45,8 @@ from nti.contenttypes.completion.tests.test_models import MockCompletionContext
 
 from nti.externalization.externalization import to_external_object
 from nti.externalization.externalization import StandardExternalFields
+
+from nti.externalization.internalization import update_from_external_object
 
 from nti.externalization.internalization import find_factory_for
 
@@ -221,7 +224,8 @@ class TestCompletion(unittest.TestCase):
         assert_that(user_container2.get_completed_item_count(), is_(0))
         assert_that(user_container2.get_completed_item(completable2), none())
 
-    def test_completable(self):
+    @fudge.patch('nti.contenttypes.completion.internalization.find_object_with_ntiid')
+    def test_completable(self, mock_find_object):
         """
         Test completable item references, functions.
         """
@@ -332,3 +336,27 @@ class TestCompletion(unittest.TestCase):
         completable_container.add_required_item(completable2)
         assert_that(completable_container.get_optional_item_count(), is_(0))
         assert_that(completable_container.get_required_item_count(), is_(1))
+
+        # Externalization
+        ext_obj = to_external_object(completable_container)
+        assert_that(ext_obj[CLASS], is_('CompletableItemContainer'))
+        assert_that(ext_obj[MIMETYPE],
+                    is_('application/vnd.nextthought.completion.completableitemcontainer'))
+        assert_that(ext_obj['required'], has_length(1))
+        assert_that(ext_obj['optional'], has_length(0))
+
+        # Cannot find object
+        mock_find_object.is_callable().returns(None)
+        factory = find_factory_for(ext_obj)
+        assert_that(factory, not_none())
+        new_io = factory()
+        update_from_external_object(new_io, ext_obj)
+        assert_that(new_io.get_required_keys(), has_length(0))
+        assert_that(new_io.get_optional_keys(), has_length(0))
+
+        # Found one
+        mock_find_object.is_callable().returns(completable2)
+        new_io = factory()
+        update_from_external_object(new_io, ext_obj)
+        assert_that(new_io.get_required_keys(), has_length(1))
+        assert_that(new_io.get_optional_keys(), has_length(0))

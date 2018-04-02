@@ -9,6 +9,7 @@ from __future__ import absolute_import
 
 from hamcrest import is_
 from hamcrest import none
+from hamcrest import contains
 from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
@@ -17,12 +18,14 @@ from hamcrest import contains_inanyorder
 from nti.testing.matchers import validly_provides
 from nti.testing.matchers import verifiably_provides
 
+import fudge
 import unittest
 
 from datetime import datetime
 
 from zope.schema.interfaces import ValidationError
 
+from nti.contenttypes.completion.adapters import CompletionContextCompletionPolicyContainer
 from nti.contenttypes.completion.adapters import CompletableItemDefaultRequiredPolicy
 
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
@@ -118,6 +121,48 @@ class TestPolicies(unittest.TestCase):
         new_io = factory()
         update_from_external_object(new_io, ext_obj)
         assert_that(new_io.percentage, is_(.5))
+
+    @fudge.patch('nti.contenttypes.completion.internalization.find_object_with_ntiid')
+    def test_container_externalization(self, mock_find_object):
+        policy1 = CompletableItemAggregateCompletionPolicy()
+        policy2 = CompletableItemAggregateCompletionPolicy()
+        policy2.percentage = .25
+
+        container = CompletionContextCompletionPolicyContainer()
+        ext_obj = to_external_object(container)
+
+        factory = find_factory_for(ext_obj)
+        assert_that(factory, not_none())
+        new_io = factory()
+        update_from_external_object(new_io, ext_obj)
+        assert_that(new_io.context_policy, none())
+        assert_that(new_io, has_length(0))
+
+        # With values
+        container = CompletionContextCompletionPolicyContainer()
+        container.context_policy = policy1
+        container['ntiid1'] = policy2
+        ext_obj = to_external_object(container)
+        assert_that(ext_obj['context_policy'], not_none())
+        assert_that(ext_obj['context_policy']['percentage'], is_(1.0))
+        items = ext_obj[ITEMS]
+        assert_that(items, has_length(1))
+        assert_that(items, contains('ntiid1'))
+        assert_that(items.values()[0]['percentage'], is_(.25))
+
+        mock_find_object.is_callable().returns(None)
+        new_io = factory()
+        update_from_external_object(new_io, ext_obj)
+        assert_that(new_io.context_policy, not_none())
+        assert_that(new_io, has_length(0))
+
+        mock_find_object.is_callable().returns(object())
+        new_io = factory()
+        update_from_external_object(new_io, ext_obj)
+        assert_that(new_io.context_policy, not_none())
+        assert_that(new_io, has_length(1))
+        assert_that(new_io.get('ntiid1'), not_none())
+        assert_that(new_io.get('ntiid1').percentage, is_(.25))
 
     def test_default_policy_externalization(self):
         completable_policy = CompletableItemDefaultRequiredPolicy()

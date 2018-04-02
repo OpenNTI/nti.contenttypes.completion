@@ -55,8 +55,10 @@
     <ext:registerAutoPackageIO
         root_interfaces=".interfaces.IProgress
                          .interfaces.ICompletedItem
+                         .interfaces.ICompletableItemContainer
                          .interfaces.ICompletionContextProgress
                          .interfaces.ICompletableItemDefaultRequiredPolicy
+                         .interfaces.ICompletionContextCompletionPolicyContainer
                          .interfaces.ICompletableItemAggregateCompletionPolicy"
         modules=".adapters .policies .completion" />
 
@@ -67,6 +69,22 @@
     <adapter factory=".internalization._CompletableItemDefaultRequiredPolicyUpdater"
              provides="nti.externalization.interfaces.IInternalObjectUpdater"
              for=".interfaces.ICompletableItemDefaultRequiredPolicy" />
+
+    <adapter factory=".externalization._CompletableItemContainerExternalObject"
+             provides="nti.externalization.interfaces.IExternalObject"
+             for=".interfaces.ICompletableItemContainer" />
+
+    <adapter factory=".internalization._CompletableItemContainerUpdater"
+             provides="nti.externalization.interfaces.IInternalObjectUpdater"
+             for=".interfaces.ICompletableItemContainer" />
+
+    <adapter factory=".externalization._CompletionContextCompletionPolicyContainerExternalObject"
+             provides="nti.externalization.interfaces.IExternalObject"
+             for=".interfaces.ICompletionContextCompletionPolicyContainer" />
+
+    <adapter factory=".internalization._CompletionContextCompletionPolicyContainerUpdater"
+             provides="nti.externalization.interfaces.IInternalObjectUpdater"
+             for=".interfaces.ICompletionContextCompletionPolicyContainer" />
 
     <!-- Subscribers -->
     <subscriber handler=".subscribers._progress_removed" />

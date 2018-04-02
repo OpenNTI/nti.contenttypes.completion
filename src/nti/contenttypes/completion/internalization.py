@@ -11,12 +11,19 @@ from __future__ import absolute_import
 from zope import component
 from zope import interface
 
+from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
 from nti.externalization.datastructures import InterfaceObjectIO
 
 from nti.externalization.interfaces import IInternalObjectUpdater
 from nti.externalization.interfaces import StandardExternalFields
+
+from nti.externalization.internalization import find_factory_for
+from nti.externalization.internalization import update_from_external_object
+
+from nti.ntiids.ntiids import find_object_with_ntiid
 
 ITEMS = StandardExternalFields.ITEMS
 
@@ -44,4 +51,58 @@ class _CompletableItemDefaultRequiredPolicyUpdater(object):
         new_mime_container = mime_container()
         new_mime_container.update(self.obj.mime_types)
         self.obj.mime_types = new_mime_container
+        return result
+
+
+@component.adapter(ICompletableItemContainer)
+@interface.implementer(IInternalObjectUpdater)
+class _CompletableItemContainerUpdater(InterfaceObjectIO):
+
+    _ext_iface_upper_bound = ICompletableItemContainer
+
+    def updateFromExternalObject(self, parsed, *args, **kwargs):
+        """
+        Make sure we store these objects in the container we choose. IO, by
+        default will store in a list.
+        """
+        result = super(_CompletableItemContainerUpdater, self).updateFromExternalObject(parsed, *args, **kwargs)
+        required = parsed.get('required') or ()
+        optional = parsed.get('optional') or ()
+        for required_ntiid in required:
+            obj = find_object_with_ntiid(required_ntiid)
+            if obj is None:
+                logger.warn('Cannot find required object (%s)', required_ntiid)
+                continue
+            self._ext_self.add_required_item(obj)
+        for optional_ntiid in optional:
+            obj = find_object_with_ntiid(optional_ntiid)
+            if obj is None:
+                logger.warn('Cannot find optional object (%s)', optional_ntiid)
+                continue
+            self._ext_self.add_optional_item(obj)
+        return result
+
+
+@component.adapter(ICompletionContextCompletionPolicyContainer)
+@interface.implementer(IInternalObjectUpdater)
+class _CompletionContextCompletionPolicyContainerUpdater(InterfaceObjectIO):
+
+    _ext_iface_upper_bound = ICompletionContextCompletionPolicyContainer
+
+    def updateFromExternalObject(self, parsed, *args, **kwargs):
+        """
+        Make sure we store these objects in the container we choose. IO, by
+        default will store in a list.
+        """
+        result = super(_CompletionContextCompletionPolicyContainerUpdater, self).updateFromExternalObject(parsed, *args, **kwargs)
+        container = parsed.get(ITEMS) or {}
+        for container_key, policy in container.items():
+            obj = find_object_with_ntiid(container_key)
+            if obj is None:
+                logger.warn('Cannot find object with ntiid for policy (%s)', container_key)
+                continue
+            factory = find_factory_for(policy)
+            policy_obj = factory()
+            update_from_external_object(policy_obj, policy)
+            self._ext_self[container_key] = policy_obj
         return result
