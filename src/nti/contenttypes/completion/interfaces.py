@@ -79,9 +79,21 @@ class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     """
 
 
-class IRequiredCompletableItemProvider(interface.Interface):
+class ICompletableItemProvider(interface.Interface):
     """
     An intended subscriber provider of possible :class:`ICompletableItem` objects
+    for a :class:`ICompletionContext`.
+    """
+
+    def iter_items(user):
+        """
+        A generator of :class:`ICompletableItem` objects based on the given user.
+        """
+
+
+class IRequiredCompletableItemProvider(interface.Interface):
+    """
+    An intended subscriber provider of required :class:`ICompletableItem` objects
     for a :class:`ICompletionContext`.
     """
 
