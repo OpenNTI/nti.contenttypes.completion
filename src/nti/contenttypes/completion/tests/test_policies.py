@@ -9,6 +9,7 @@ from __future__ import absolute_import
 
 from hamcrest import is_
 from hamcrest import none
+from hamcrest import is_not
 from hamcrest import contains
 from hamcrest import not_none
 from hamcrest import has_length
@@ -193,6 +194,15 @@ class TestPolicies(unittest.TestCase):
         assert_that(new_io.mime_types, has_length(2))
         assert_that(new_io.mime_types, contains_inanyorder(u'mime_type1',
                                                            u'mime_type2'))
+
+    def test_aggregate_policy_equality(self):
+        completion_policy1 = CompletableItemAggregateCompletionPolicy()
+        completion_policy2 = CompletableItemAggregateCompletionPolicy()
+        assert_that(completion_policy1, is_(completion_policy2))
+        completion_policy2.percentage = .5
+        assert_that(completion_policy1, is_not(completion_policy2))
+        completion_policy1.percentage = .5
+        assert_that(completion_policy1, is_(completion_policy2))
 
     def test_context_completion_policy(self):
         user = MockUser(u'girls')
