@@ -21,11 +21,14 @@ from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
 from nti.schema.fieldproperty import createDirectFieldProperties
 
+from nti.schema.eqhash import EqHash
+
 from nti.schema.schema import SchemaConfigured
 
 logger = __import__('logging').getLogger(__name__)
 
 
+@EqHash('percentage')
 @interface.implementer(ICompletableItemAggregateCompletionPolicy)
 class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeObject,
                                                SchemaConfigured,
