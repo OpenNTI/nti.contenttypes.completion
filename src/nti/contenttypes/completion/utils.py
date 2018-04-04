@@ -13,6 +13,7 @@ from zope import component
 from nti.contenttypes.completion.interfaces import IProgress
 from nti.contenttypes.completion.interfaces import ICompletedItem
 from nti.contenttypes.completion.interfaces import ICompletableItem
+from nti.contenttypes.completion.interfaces import ICompletableItemProvider
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
@@ -80,3 +81,18 @@ def get_completed_item(user, context, item):
     user_container = component.getMultiAdapter((user, context),
                                                IPrincipalCompletedItemContainer)
     return user_container.get_completed_item(item)
+
+
+def get_completable_items_for_user(user, context):
+    """
+    Return the possible :class:`ICompletedItem` for the given context and user.
+    :param user: the user who has updated progress on the item
+    :param context: the :class:`ICompletionContext`
+    """
+    result = set()
+    item_providers = component.subscribers((context,),
+                                           ICompletableItemProvider)
+    for item_provider in item_providers:
+        completable_items = item_provider.iter_items(user)
+        result.update(completable_items)
+    return result
