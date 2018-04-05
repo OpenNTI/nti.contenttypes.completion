@@ -44,6 +44,7 @@ def completion_context_default_policy(completion_context, unused_event):
         if policy_factory is not None:
             new_policy = policy_factory()
             if new_policy is not None:
-                interface.alsoProvides(new_policy, ICompletionContextCompletionPolicy)
+                interface.alsoProvides(new_policy,
+                                       ICompletionContextCompletionPolicy)
                 policy_container.context_policy = new_policy
                 new_policy.__parent__ = policy_container
