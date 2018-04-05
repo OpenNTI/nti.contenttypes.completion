@@ -25,6 +25,8 @@ from nti.externalization.interfaces import StandardExternalFields
 
 ITEMS = StandardExternalFields.ITEMS
 
+logger = __import__('logging').getLogger(__name__)
+
 
 @component.adapter(ICompletableItemDefaultRequiredPolicy)
 @interface.implementer(IExternalObject)
@@ -35,7 +37,9 @@ class _CompletableItemDefaultRequiredPolicyExternalObject(object):
 
     def toExternalObject(self, **kwargs):
         result = to_standard_external_dictionary(self.policy, **kwargs)
-        result['mime_types'] = [to_external_object(x) for x in self.policy.mime_types]
+        result['mime_types'] = [
+            to_external_object(x) for x in self.policy.mime_types
+        ]
         return result
 
 
@@ -64,5 +68,7 @@ class _CompletionContextCompletionPolicyContainerExternalObject(object):
         result = to_standard_external_dictionary(self.container, **kwargs)
         # TODO: Why do I have to do this?
         result['context_policy'] = to_external_object(self.container.context_policy)
-        result[ITEMS] = {key:to_external_object(val) for key, val in self.container.items()}
+        result[ITEMS] = {
+            key: to_external_object(val) for key, val in self.container.items()
+        }
         return result

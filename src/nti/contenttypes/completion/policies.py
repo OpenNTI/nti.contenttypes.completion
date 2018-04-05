@@ -33,7 +33,6 @@ logger = __import__('logging').getLogger(__name__)
 class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeObject,
                                                SchemaConfigured,
                                                Contained):
-
     createDirectFieldProperties(ICompletableItemAggregateCompletionPolicy)
 
     mimeType = mime_type = "application/vnd.nextthought.completion.aggregatecompletionpolicy"
@@ -67,7 +66,6 @@ class CompletionContextCompletionPolicyFactory(SchemaConfigured):
     A :class:`ICompletionContextCompletionPolicyFactory` that returns a default
     100% :class:`ICompletableItemAggregateCompletionPolicy`.
     """
-
     createDirectFieldProperties(ICompletionContextCompletionPolicyFactory)
 
     def __call__(self):
@@ -80,7 +78,6 @@ class NoOpCompletionContextCompletionPolicyFactory(SchemaConfigured):
     A :class:`ICompletionContextCompletionPolicyFactory` that returns no
     policy, for those sites that do not want completion by default.
     """
-
     createDirectFieldProperties(ICompletionContextCompletionPolicyFactory)
 
     def __call__(self):

@@ -27,10 +27,10 @@ from nti.schema.schema import SchemaConfigured
 
 logger = __import__('logging').getLogger(__name__)
 
+
 @WithRepr
 @interface.implementer(IProgress)
 class Progress(SchemaConfigured):
-
     createDirectFieldProperties(IProgress)
 
     __external_can_create__ = False
@@ -41,6 +41,7 @@ class Progress(SchemaConfigured):
     last_modified = alias('LastModified')
     ntiid = alias('NTIID')
 
+    # pylint: disable=keyword-arg-before-vararg
     def __init__(self, User=None, LastModified=None, *args, **kwargs):
         last_mod = LastModified
         if LastModified is not None:
@@ -58,7 +59,7 @@ class Progress(SchemaConfigured):
     def PercentageProgress(self):
         try:
             result = float(self.AbsoluteProgress) / float(self.MaxPossibleProgress)
-        except (TypeError, ZeroDivisionError):
+        except (TypeError, ZeroDivisionError, AttributeError):
             result = None
         return result
 
@@ -66,7 +67,6 @@ class Progress(SchemaConfigured):
 @WithRepr
 @interface.implementer(ICompletionContextProgress)
 class CompletionContextProgress(Progress, SchemaConfigured):
-
     createDirectFieldProperties(ICompletionContextProgress)
 
     __external_can_create__ = False
@@ -79,8 +79,10 @@ class CompletionContextProgress(Progress, SchemaConfigured):
 
     @property
     def Completed(self):
+        # pylint: disable=no-member
         return self.CompletedItem is not None
 
     @property
     def CompletedDate(self):
+        # pylint: disable=no-member
         return getattr(self.CompletedItem, 'CompletedDate', None)

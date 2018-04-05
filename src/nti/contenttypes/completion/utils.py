@@ -34,7 +34,7 @@ def update_completion(obj, ntiid, user, context):
     :param context: the :class:`ICompletionContext`
     """
     principal_container = component.queryMultiAdapter((user, context),
-                                                       IPrincipalCompletedItemContainer)
+                                                      IPrincipalCompletedItemContainer)
     if ntiid not in principal_container:
         policy = component.getMultiAdapter((obj, context),
                                            ICompletableItemCompletionPolicy)
@@ -44,7 +44,7 @@ def update_completion(obj, ntiid, user, context):
             completed_item = policy.is_complete(progress)
             if completed_item is not None:
                 logger.info('Marking item complete (ntiid=%s) (user=%s) (item=%s)',
-                             ntiid, user.username, completed_item)
+                            ntiid, user.username, completed_item)
                 assert ICompletedItem.providedBy(completed_item)
                 assert completed_item.item_ntiid == ntiid
                 principal_container[ntiid] = completed_item
@@ -61,12 +61,14 @@ def is_item_required(item, context):
         return False
     required_container = ICompletableItemContainer(context)
     default_policy = ICompletableItemDefaultRequiredPolicy(context)
+    # pylint: disable=too-many-function-args
     if required_container.is_item_required(item):
         result = True
     elif required_container.is_item_optional(item):
         result = False
     else:
         item_mime_type = getattr(item, 'mime_type', '')
+        # pylint: disable=unsupported-membership-test
         result = item_mime_type in default_policy.mime_types
     return result
 

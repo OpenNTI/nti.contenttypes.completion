@@ -46,7 +46,7 @@ class _CompletableItemDefaultRequiredPolicyUpdater(object):
         """
         mime_container = type(self.obj.mime_types)
         interface_io = InterfaceObjectIO(self.obj,
-                                        ICompletableItemDefaultRequiredPolicy)
+                                         ICompletableItemDefaultRequiredPolicy)
         result = interface_io.updateFromExternalObject(parsed, *args, **kwargs)
         new_mime_container = mime_container()
         new_mime_container.update(self.obj.mime_types)
@@ -65,19 +65,21 @@ class _CompletableItemContainerUpdater(InterfaceObjectIO):
         Make sure we store these objects in the container we choose. IO, by
         default will store in a list.
         """
-        result = super(_CompletableItemContainerUpdater, self).updateFromExternalObject(parsed, *args, **kwargs)
+        result = super(_CompletableItemContainerUpdater,self).updateFromExternalObject(parsed, *args, **kwargs)
         required = parsed.get('required') or ()
         optional = parsed.get('optional') or ()
         for required_ntiid in required:
             obj = find_object_with_ntiid(required_ntiid)
             if obj is None:
-                logger.warn('Cannot find required object (%s)', required_ntiid)
+                logger.warning('Cannot find required object (%s)',
+                               required_ntiid)
                 continue
             self._ext_self.add_required_item(obj)
         for optional_ntiid in optional:
             obj = find_object_with_ntiid(optional_ntiid)
             if obj is None:
-                logger.warn('Cannot find optional object (%s)', optional_ntiid)
+                logger.warning('Cannot find optional object (%s)',
+                               optional_ntiid)
                 continue
             self._ext_self.add_optional_item(obj)
         return result
@@ -99,7 +101,8 @@ class _CompletionContextCompletionPolicyContainerUpdater(InterfaceObjectIO):
         for container_key, policy in container.items():
             obj = find_object_with_ntiid(container_key)
             if obj is None:
-                logger.warn('Cannot find object with ntiid for policy (%s)', container_key)
+                logger.warning('Cannot find object with ntiid for policy (%s)',
+                               container_key)
                 continue
             factory = find_factory_for(policy)
             policy_obj = factory()
