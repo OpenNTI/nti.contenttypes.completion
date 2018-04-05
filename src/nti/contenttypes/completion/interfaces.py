@@ -152,6 +152,7 @@ class ICompletionContextCompletionPolicy(interface.Interface):
     :class:`ICompletionContext` objects that determines the conditions in which the
     :class:`ICompletionContext' object can be considered complete.
     """
+# pylint: disable=no-value-for-parameter
 ICompletionContextCompletionPolicy.setTaggedValue('_ext_is_marker_interface', True)
 
 
