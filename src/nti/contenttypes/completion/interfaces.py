@@ -8,6 +8,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+# pylint: disable=inherit-non-class,expression-not-assigned
+
 from zope import interface
 
 from zope.annotation.interfaces import IAttributeAnnotatable
@@ -299,6 +301,7 @@ class ICompletedItemContainer(IContainer):
         Remove all :class:`ICompletedItem` objects referenced by the given
         :class:`ICompletableItem`, returning the count of removed items.
         """
+
 
 class IProgress(interface.Interface):
     """
