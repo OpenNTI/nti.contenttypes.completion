@@ -8,6 +8,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+import time
+
 from BTrees.OOBTree import OOBTree
 from BTrees.OOBTree import OOTreeSet
 
@@ -26,7 +28,12 @@ from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeCo
 
 from nti.contenttypes.completion.completion import PrincipalCompletedItemContainer
 
+from nti.contenttypes.completion.interfaces import ICompletedItem
+from nti.contenttypes.completion.interfaces import ISuccessAdapter
+from nti.contenttypes.completion.interfaces import IItemNTIIDAdapter
+from nti.contenttypes.completion.interfaces import IPrincipalAdapter
 from nti.contenttypes.completion.interfaces import ICompletionContext
+from nti.contenttypes.completion.interfaces import ICompletionTimeAdapter
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
@@ -269,3 +276,67 @@ def _context_to_principal_container(user, completion_context):
 def _context_to_completion_policy(completion_context):
     container = ICompletionContextCompletionPolicyContainer(completion_context)
     return container.context_policy
+
+
+# catalog
+
+
+class _Principal(object):
+
+    __slots__ = ('id',)
+
+    def __init__(self, pid):
+        self.id = pid
+
+
+@component.adapter(ICompletedItem)
+@interface.implementer(IPrincipalAdapter)
+def _completed_item_to_principal(context):
+    principal = IPrincipal(context.Principal, None)
+    return _Principal(principal.id) if principal is not None else None
+
+
+class _CompletionTime(object):
+
+    __slots__ = ('completionTime',)
+
+    def __init__(self, completionTime):
+        self.completionTime = completionTime
+
+
+@component.adapter(ICompletedItem)
+@interface.implementer(ICompletionTimeAdapter)
+def _completed_item_to_completion_time(context):
+    completed = context.CompletedDate
+    completed = time.mktime(completed.timetuple()) if completed else None
+    return _CompletionTime(completed) if completed else None
+
+
+class _NTIID(object):
+
+    __slots__ = ('ntiid',)
+
+    def __init__(self, ntiid):
+        self.ntiid = ntiid
+
+
+@component.adapter(ICompletedItem)
+@interface.implementer(IItemNTIIDAdapter)
+def _completed_item_to_item_ntiid(context):
+    ntiid = getattr(context, 'item_ntiid', None) \
+         or getattr(context.Item, 'ntiid', None)
+    return _NTIID(ntiid) if ntiid else None
+
+
+class _Success(object):
+
+    __slots__ = ('success',)
+
+    def __init__(self, success):
+        self.success = success
+
+
+@component.adapter(ICompletedItem)
+@interface.implementer(ISuccessAdapter)
+def _completed_item_to_success(context):
+    return _Success(context.Success)

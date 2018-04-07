@@ -59,6 +59,7 @@ setup(
         'nti.property',
         'nti.schema',
         'nti.wref',
+        'nti.zope_catalog',
         'setuptools',
         'six',
         'ZODB',
@@ -66,7 +67,9 @@ setup(
         'zope.component',
         'zope.container',
         'zope.event',
+        'zope.location',
         'zope.interface',
+        'zope.intid',
         'zope.security',
     ],
     extras_require={
