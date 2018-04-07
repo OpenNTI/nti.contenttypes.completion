@@ -8,14 +8,14 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+import BTrees
+
 from zope import component
 from zope import interface
 
 from zope.intid.interfaces import IIntIds
 
 from zope.location import locate
-
-import BTrees
 
 from nti.contenttypes.completion.interfaces import ISiteAdapter
 from nti.contenttypes.completion.interfaces import ISuccessAdapter
@@ -24,13 +24,13 @@ from nti.contenttypes.completion.interfaces import IItemNTIIDAdapter
 from nti.contenttypes.completion.interfaces import IContextNTIIDAdapter
 from nti.contenttypes.completion.interfaces import ICompletionTimeAdapter
 
+from nti.zope_catalog.catalog import DeferredCatalog
+
 from nti.zope_catalog.datetime import TimestampToNormalized64BitIntNormalizer
 
 from nti.zope_catalog.index import AttributeValueIndex
 from nti.zope_catalog.index import NormalizationWrapper
 from nti.zope_catalog.index import IntegerValueIndex as RawIntegerValueIndex
-
-from nti.zope_catalog.catalog import DeferredCatalog
 
 from nti.zope_catalog.interfaces import IDeferredCatalog
 
@@ -75,7 +75,7 @@ class ItemNTIIDIndex(AttributeValueIndex):
 class ContextNTIIDIndex(AttributeValueIndex):
     default_field_name = 'ntiid'
     default_interface = IContextNTIIDAdapter
-    
+
 
 class SucessIndex(AttributeValueIndex):
     default_field_name = 'success'
