@@ -61,7 +61,7 @@ class TestPolicies(unittest.TestCase):
     def test_progress_externalization(self):
         now = datetime.utcnow()
         user = MockUser(u'paper')
-        item = MockCompletableItem(u'ntiid')
+        item = MockCompletableItem('tag:nextthought.com,2011-10:NTI-TEST-completable1')
         context = MockCompletionContext()
         progress = Progress(NTIID=u'ntiid',
                             AbsoluteProgress=10,

@@ -27,6 +27,8 @@ from zope.security.interfaces import IPrincipal
 
 from nti.base.interfaces import ILastModified
 
+from nti.ntiids.schema import ValidNTIID
+
 from nti.property.property import alias
 
 from nti.schema.field import Bool
@@ -71,6 +73,8 @@ class ICompletedItem(IContained):
     Success = Bool(title=u"Successfully completed",
                    description=u"Indicates the user has successfully completed this item.",
                    default=True)
+
+    ItemNTIID = ValidNTIID(title=u"Completed Item NTIID", required=False, default=None)
 
 
 class ICompletionContext(ICompletableItem, IAttributeAnnotatable):

@@ -94,6 +94,7 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaCon
     _item_ntiid = None
 
     user = alias('Principal')
+    item_ntiid = alias('ItemNTIID')
 
     mimeType = mime_type = "application/vnd.nextthought.completion.completeditem"
 
@@ -112,5 +113,5 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaCon
         return result
 
     @property
-    def item_ntiid(self):
+    def ItemNTIID(self):
         return self._item_ntiid or self.__name__

@@ -15,6 +15,7 @@ from nti.contenttypes.completion.interfaces import ICompletedItem
 from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import ICompletableItemProvider
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
+from nti.contenttypes.completion.interfaces import IRequiredCompletableItemProvider
 from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
@@ -94,6 +95,21 @@ def get_completable_items_for_user(user, context):
     result = set()
     item_providers = component.subscribers((context,),
                                            ICompletableItemProvider)
+    for item_provider in item_providers:
+        completable_items = item_provider.iter_items(user)
+        result.update(completable_items)
+    return result
+
+
+def get_required_completable_items_for_user(user, context):
+    """
+    Return the required :class:`ICompletedItem` for the given context and user.
+    :param user: the user who has updated progress on the item
+    :param context: the :class:`ICompletionContext`
+    """
+    result = set()
+    item_providers = component.subscribers((context,),
+                                           IRequiredCompletableItemProvider)
     for item_provider in item_providers:
         completable_items = item_provider.iter_items(user)
         result.update(completable_items)

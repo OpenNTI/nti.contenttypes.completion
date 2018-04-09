@@ -132,8 +132,8 @@ class TestCompletion(unittest.TestCase):
         now = datetime.utcnow()
         user1 = MockUser(u'user1')
         user2 = MockUser(u'user2')
-        completable1 = MockCompletableItem('completable1')
-        completable2 = MockCompletableItem('completable2')
+        completable1 = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable1')
+        completable2 = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable2')
         completion_context = MockCompletionContext()
         # pylint: disable=too-many-function-args
         # Base cases
@@ -229,9 +229,9 @@ class TestCompletion(unittest.TestCase):
         """
         Test completable item references, functions.
         """
-        completable1 = MockCompletableItem('completable1')
-        completable2 = MockCompletableItem('completable2')
-        completable3 = MockCompletableItem('completable3')
+        completable1 = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable1')
+        completable2 = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable2')
+        completable3 = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable3')
 
         completion_context = MockCompletionContext()
         # pylint: disable=too-many-function-args
@@ -284,7 +284,7 @@ class TestCompletion(unittest.TestCase):
                     is_(True))
 
         # Remove items
-        assert_that(completable_container.remove_required_item('completable1'),
+        assert_that(completable_container.remove_required_item(completable1.ntiid),
                     is_(True))
         assert_that(completable_container.get_optional_item_count(), is_(1))
         assert_that(completable_container.get_required_item_count(), is_(1))
