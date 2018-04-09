@@ -416,3 +416,48 @@ class UserProgressUpdatedEvent(AbstractUserProgressEvent):
 @interface.implementer(IUserProgressRemovedEvent)
 class UserProgressRemovedEvent(AbstractUserProgressEvent):
     pass
+
+
+# catalog
+
+
+class ISiteAdapter(interface.Interface):
+    """
+    Adapts contained objects to their site.
+    """
+    site = interface.Attribute("site string")
+    
+
+class IPrincipalAdapter(interface.Interface):
+    """
+    Adapts contained objects to their principal id.
+    """
+    id = interface.Attribute("principal id string")
+
+
+class ICompletionTimeAdapter(interface.Interface):
+    """
+    Adapts contained objects to their completion time.
+    """
+    completionTime = interface.Attribute("completion timestamp")
+
+
+class IItemNTIIDAdapter(interface.Interface):
+    """
+    Adapts contained objects to their item NTIID.
+    """
+    ntiid = interface.Attribute("NTIID string")
+
+
+class ISuccessAdapter(interface.Interface):
+    """
+    Adapts contained objects to their completion success.
+    """
+    success = interface.Attribute("success bool")
+
+
+class IContextNTIIDAdapter(interface.Interface):
+    """
+    Adapts contained objects to their context NTIID.
+    """
+    ntiid = interface.Attribute("NTIID string")

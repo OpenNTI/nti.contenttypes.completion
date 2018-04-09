@@ -93,4 +93,10 @@
     <utility factory=".policies.CompletionContextCompletionPolicyFactory"
              provides=".interfaces.ICompletionContextCompletionPolicyFactory" />
 
+	<!-- Index  -->
+	<adapter factory=".adapters._completed_item_to_success" />
+	<adapter factory=".adapters._completed_item_to_principal" />
+	<adapter factory=".adapters._completed_item_to_item_ntiid" />
+	<adapter factory=".adapters._completed_item_to_completion_time" />
+
 </configure>
