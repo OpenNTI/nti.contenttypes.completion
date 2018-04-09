@@ -8,8 +8,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import time
-
 from BTrees.OOBTree import OOBTree
 from BTrees.OOBTree import OOTreeSet
 
@@ -308,7 +306,6 @@ class _CompletionTime(object):
 @interface.implementer(ICompletionTimeAdapter)
 def _completed_item_to_completion_time(context):
     completed = context.CompletedDate
-    completed = time.mktime(completed.timetuple()) if completed else None
     return _CompletionTime(completed) if completed else None
 
 
@@ -323,9 +320,7 @@ class _NTIID(object):
 @component.adapter(ICompletedItem)
 @interface.implementer(IItemNTIIDAdapter)
 def _completed_item_to_item_ntiid(context):
-    ntiid = getattr(context, 'item_ntiid', None) \
-         or getattr(context.Item, 'ntiid', None)
-    return _NTIID(ntiid) if ntiid else None
+    return _NTIID(context.ItemNTIID)
 
 
 class _Success(object):
