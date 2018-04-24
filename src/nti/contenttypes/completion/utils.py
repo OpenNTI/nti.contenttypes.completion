@@ -44,10 +44,11 @@ def update_completion(obj, ntiid, user, context):
         if progress is not None:
             completed_item = policy.is_complete(progress)
             if completed_item is not None:
+                # The completed item we get may be different from the given obj.
                 logger.info('Marking item complete (ntiid=%s) (user=%s) (item=%s)',
                             ntiid, user.username, completed_item)
-                assert ICompletedItem.providedBy(completed_item)
-                assert completed_item.item_ntiid == ntiid
+                assert ICompletedItem.providedBy(completed_item), \
+                       "Must have completed item"
                 principal_container[ntiid] = completed_item
 
 

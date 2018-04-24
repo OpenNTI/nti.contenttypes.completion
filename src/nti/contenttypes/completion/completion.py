@@ -21,6 +21,8 @@ from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeCo
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
+from nti.externalization.representation import WithRepr
+
 from nti.property.property import alias
 
 from nti.schema.fieldproperty import createDirectFieldProperties
@@ -82,6 +84,7 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
         return result
 
 
+@WithRepr
 @interface.implementer(ICompletedItem)
 class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaConfigured):
     createDirectFieldProperties(ICompletedItem)
