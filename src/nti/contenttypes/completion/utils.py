@@ -36,6 +36,10 @@ def update_completion(obj, ntiid, user, context):
     """
     principal_container = component.queryMultiAdapter((user, context),
                                                       IPrincipalCompletedItemContainer)
+    if principal_container is None:
+        # Most likely gave us an empty context, which is an error case.
+        logger.warn('No container found for progress update (%s) (%s)', ntiid, context)
+        return
     if ntiid not in principal_container:
         policy = component.getMultiAdapter((obj, context),
                                            ICompletableItemCompletionPolicy)
