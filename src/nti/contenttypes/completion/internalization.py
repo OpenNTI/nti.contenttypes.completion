@@ -12,6 +12,7 @@ from zope import component
 from zope import interface
 
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
@@ -108,4 +109,9 @@ class _CompletionContextCompletionPolicyContainerUpdater(InterfaceObjectIO):
             policy_obj = factory()
             update_from_external_object(policy_obj, policy)
             self._ext_self[container_key] = policy_obj
+        if self._ext_self.context_policy is not None:
+            # Set completion context policy features
+            interface.alsoProvides(self._ext_self.context_policy,
+                                   ICompletionContextCompletionPolicy)
+            self._ext_self.context_policy.__parent__ = self._ext_self
         return result
