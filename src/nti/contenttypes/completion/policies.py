@@ -30,16 +30,15 @@ logger = __import__('logging').getLogger(__name__)
 
 
 @interface.implementer(ICompletableItemCompletionPolicy)
-class CompletableItemDefaultCompletionPolicy(object):
+class AbstractCompletableItemCompletionPolicy(PersistentCreatedAndModifiedTimeObject,
+                                              SchemaConfigured,
+                                              Contained):
     createDirectFieldProperties(ICompletableItemCompletionPolicy)
     
 
 @EqHash('percentage')
 @interface.implementer(ICompletableItemAggregateCompletionPolicy)
-class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeObject,
-                                               SchemaConfigured,
-                                               Contained,
-                                               CompletableItemDefaultCompletionPolicy):
+class CompletableItemAggregateCompletionPolicy(AbstractCompletableItemCompletionPolicy):
     createDirectFieldProperties(ICompletableItemAggregateCompletionPolicy)
 
     mimeType = mime_type = "application/vnd.nextthought.completion.aggregatecompletionpolicy"
