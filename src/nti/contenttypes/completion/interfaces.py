@@ -132,7 +132,7 @@ class ICompletableItemCompletionPolicy(IContained):
                                          description=u"""Whether a certificate is offered
                                          for the completion of the completion-context.""",
                                          required=True,
-                                         default=True)
+                                         default=False)
 
     def is_complete(progress):
         """
