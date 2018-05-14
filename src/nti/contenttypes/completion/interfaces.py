@@ -127,6 +127,12 @@ class ICompletableItemCompletionPolicy(IContained):
     conditions in which the :class:`ICompletableItem' object can be
     considered complete.
     """
+    
+    offers_completion_certificate = Bool(title=u'Offers Completion Certificate',
+                                         description=u"""Whether a certificate is offered
+                                         for the completion of the completion-context.""",
+                                         required=True,
+                                         default=True)
 
     def is_complete(progress):
         """
