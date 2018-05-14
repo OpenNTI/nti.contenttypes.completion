@@ -105,6 +105,7 @@ class TestPolicies(unittest.TestCase):
         assert_that(ext_obj[CLASS], is_('CompletableItemAggregateCompletionPolicy'))
         assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.aggregatecompletionpolicy'))
         assert_that(ext_obj['percentage'], is_(1.0))
+        assert_that(ext_obj['offers_completion_certificate'], is_(False))
 
         factory = find_factory_for(ext_obj)
         assert_that(factory, not_none())
