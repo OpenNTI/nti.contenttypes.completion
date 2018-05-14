@@ -14,6 +14,7 @@ from zope.container.contained import Contained
 
 from nti.contenttypes.completion.completion import CompletedItem
 
+from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemAggregateCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyFactory
 
@@ -28,11 +29,17 @@ from nti.schema.schema import SchemaConfigured
 logger = __import__('logging').getLogger(__name__)
 
 
+@interface.implementer(ICompletableItemCompletionPolicy)
+class CompletableItemDefaultCompletionPolicy(object):
+    createDirectFieldProperties(ICompletableItemCompletionPolicy)
+    
+
 @EqHash('percentage')
 @interface.implementer(ICompletableItemAggregateCompletionPolicy)
 class CompletableItemAggregateCompletionPolicy(PersistentCreatedAndModifiedTimeObject,
                                                SchemaConfigured,
-                                               Contained):
+                                               Contained,
+                                               CompletableItemDefaultCompletionPolicy):
     createDirectFieldProperties(ICompletableItemAggregateCompletionPolicy)
 
     mimeType = mime_type = "application/vnd.nextthought.completion.aggregatecompletionpolicy"
