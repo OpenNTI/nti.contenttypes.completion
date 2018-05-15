@@ -25,12 +25,13 @@ logger = __import__('logging').getLogger(__name__)
 
 @component.adapter(ICompletableItem, IUserProgressRemovedEvent)
 def _progress_removed(item, event):
-    principal_container = component.getMultiAdapter((event.user, event.context),
-                                                    IPrincipalCompletedItemContainer)
-    logger.info('Removing progress for user (%s) (item=%s)',
+    if event.user is not None:
+        logger.info('Removing progress for user (%s) (item=%s)',
                 event.user, item.ntiid)
-    principal_container.remove_item(item)
-    update_completion(item, item.ntiid, event.user, event.context)
+        principal_container = component.getMultiAdapter((event.user, event.context),
+                                                        IPrincipalCompletedItemContainer)
+        principal_container.remove_item(item)
+        update_completion(item, item.ntiid, event.user, event.context)
 
 
 def completion_context_default_policy(completion_context, unused_event):
