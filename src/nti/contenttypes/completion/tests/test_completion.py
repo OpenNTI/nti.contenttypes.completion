@@ -345,6 +345,11 @@ class TestCompletion(unittest.TestCase):
         assert_that(ext_obj['required'], has_length(1))
         assert_that(ext_obj['optional'], has_length(0))
 
+        # clear
+        completable_container.clear()
+        assert_that(completable_container.get_optional_item_count(), is_(0))
+        assert_that(completable_container.get_required_item_count(), is_(0))
+        
         # Cannot find object
         mock_find_object.is_callable().returns(None)
         factory = find_factory_for(ext_obj)

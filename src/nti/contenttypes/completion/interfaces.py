@@ -248,6 +248,11 @@ class ICompletableItemContainer(interface.Interface):
         Return the count of optional items.
         """
 
+    def clear():
+        """
+        Clear this container
+        """
+
 
 class IPrincipalCompletedItemContainer(IContainer, IContained):
     """
