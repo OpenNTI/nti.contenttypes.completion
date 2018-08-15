@@ -189,6 +189,9 @@ class CompletableItemContainer(PersistentCreatedAndModifiedTimeObject,
         """
         return len(self._optional)
 
+    def clear(self):
+        self._optional.clear()
+        self._required.clear()
 
 _CompletableItemContainerFactory = an_factory(CompletableItemContainer,
                                               COMPLETABLE_ITEM_ANNOTATION_KEY)
