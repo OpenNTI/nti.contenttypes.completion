@@ -14,6 +14,7 @@ from zope import interface
 from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import IUserProgressRemovedEvent
+from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyFactory
@@ -57,7 +58,10 @@ def completion_context_deleted_event(completion_context, unused_event=None):
     A subscriber that can be registered (as needed) :class:`ICompletionContext` is
     deleted
     """
-    for clazz in (ICompletionContextCompletionPolicyContainer, ICompletedItemContainer):
+    for clazz in (ICompletionContextCompletionPolicyContainer,
+                  ICompletableItemContainer,
+                  ICompletedItemContainer):
         container = clazz(completion_context, None)
         if container:
+            # pylint: disable=too-many-function-args
             container.clear()
