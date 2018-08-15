@@ -58,7 +58,7 @@ logger = __import__('logging').getLogger(__name__)
 class CompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
                              SchemaConfigured):
     """
-    Stores mappings of username -> IIUserCompletedItemContainer for a user.
+    Stores mappings of username -> IPrincipalCompletedItemContainer for a user.
     """
     createDirectFieldProperties(ICompletedItemContainer)
 
