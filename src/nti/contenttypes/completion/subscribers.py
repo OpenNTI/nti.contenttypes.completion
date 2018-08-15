@@ -57,6 +57,7 @@ def completion_context_deleted_event(completion_context, unused_event=None):
     A subscriber that can be registered (as needed) :class:`ICompletionContext` is
     deleted
     """
-    container = ICompletedItemContainer(completion_context, None)
-    if container:
-        container.clear()
+    for clazz in (ICompletionContextCompletionPolicyContainer, ICompletedItemContainer):
+        container = clazz(completion_context, None)
+        if container:
+            container.clear()
