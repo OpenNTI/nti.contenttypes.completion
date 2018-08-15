@@ -125,6 +125,12 @@ class TestCompletion(unittest.TestCase):
                     validly_provides(ICompletableItemDefaultRequiredPolicy))
         assert_that(default_required.mime_types, has_length(0))
 
+        assert_that(completed_container, has_length(2))
+        completed_container.clear()
+        assert_that(completed_container, has_length(0))
+        assert_that(user_container, has_length(0))
+        assert_that(user_container2, has_length(0))
+
     def test_completed(self):
         """
         Test completed item storage, access, and removal.

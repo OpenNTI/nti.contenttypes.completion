@@ -93,6 +93,10 @@ class CompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
                 count += 1
         return count
 
+    def clear(self):
+        for user_container in self.values():
+            user_container.clear()
+        super(CompletedItemContainer, self).clear()
 
 _CompletedItemContainerFactory = an_factory(CompletedItemContainer,
                                             COMPLETED_ITEM_ANNOTATION_KEY)
