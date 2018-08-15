@@ -12,6 +12,7 @@ from zope import component
 from zope import interface
 
 from nti.contenttypes.completion.interfaces import ICompletableItem
+from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import IUserProgressRemovedEvent
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
@@ -34,7 +35,7 @@ def _progress_removed(item, event):
         update_completion(item, item.ntiid, event.user, event.context)
 
 
-def completion_context_default_policy(completion_context, unused_event):
+def completion_context_default_policy(completion_context, unused_event=None):
     """
     A subscriber that can be registered (as needed) to add a
     :class:`ICompletionContextCompletionPolicy` to a :class:`ICompletionContext`.
@@ -49,3 +50,13 @@ def completion_context_default_policy(completion_context, unused_event):
                                        ICompletionContextCompletionPolicy)
                 policy_container.context_policy = new_policy
                 new_policy.__parent__ = policy_container
+
+
+def completion_context_deleted_event(completion_context, unused_event=None):
+    """
+    A subscriber that can be registered (as needed) :class:`ICompletionContext` is
+    deleted
+    """
+    container = ICompletedItemContainer(completion_context, None)
+    if container:
+        container.clear()
