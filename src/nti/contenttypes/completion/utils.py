@@ -8,7 +8,17 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+import six
+
 from zope import component
+
+from zope.intid.interfaces import IIntIds
+
+from nti.contenttypes.completion.index import IX_SITE
+from nti.contenttypes.completion.index import IX_PRINCIPAL
+from nti.contenttypes.completion.index import IX_ITEM_NTIID
+from nti.contenttypes.completion.index import IX_CONTEXT_NTIID
+from nti.contenttypes.completion.index import get_completed_item_catalog
 
 from nti.contenttypes.completion.interfaces import IProgress
 from nti.contenttypes.completion.interfaces import ICompletedItem
@@ -38,7 +48,8 @@ def update_completion(obj, ntiid, user, context):
                                                       IPrincipalCompletedItemContainer)
     if principal_container is None:
         # Most likely gave us an empty context, which is an error case.
-        logger.warn('No container found for progress update (%s) (%s)', ntiid, context)
+        logger.warning('No container found for progress update (%s) (%s)',
+                       ntiid, context)
         return
     if ntiid not in principal_container:
         policy = component.getMultiAdapter((obj, context),
@@ -48,7 +59,8 @@ def update_completion(obj, ntiid, user, context):
         if progress is not None:
             completed_item = policy.is_complete(progress)
             if completed_item is not None:
-                # The completed item we get may be different from the given obj.
+                # The completed item we get may be different from the given
+                # obj.
                 logger.info('Marking item complete (ntiid=%s) (user=%s) (item=%s)',
                             ntiid, user.username, completed_item)
                 assert ICompletedItem.providedBy(completed_item), \
@@ -118,4 +130,48 @@ def get_required_completable_items_for_user(user, context):
     for item_provider in item_providers:
         completable_items = item_provider.iter_items(user)
         result.update(completable_items)
+    return result
+
+
+def get_indexed_completed_items(users=(), contexts=(), items=(), sites=(),
+                                catalog=None, intids=None):
+    """
+    Return completed items according to the parameters
+    """
+    query = {}
+    result = []
+    catalog = get_completed_item_catalog() if catalog is None else catalog
+
+    # process users/principals
+    if users:
+        if isinstance(users, six.string_types):
+            users = users.split(',')
+        users = {
+            getattr(x, 'id', None) or getattr(x, 'username', x)
+            for x in users
+        }
+        query[IX_PRINCIPAL] = {'any_of': users}
+
+    # process sites
+    if sites:
+        if isinstance(sites, six.string_types):
+            sites = sites.split(',')
+        query[IX_SITE] = {'any_of': sites}
+
+    # process context and items
+    for values, index in ((contexts, IX_CONTEXT_NTIID),
+                          (items, IX_ITEM_NTIID)):
+        if not values:
+            continue
+        if isinstance(values, six.string_types):
+            values = values.split(',')
+        values = {getattr(x, 'ntiid', x) for x in values}
+        query[index] = {'any_of': values}
+
+    if query:  # perform query
+        intids = component.getUtility(IIntIds) if intids is None else intids
+        for doc_id in catalog.apply(query) or ():
+            obj = intids.queryObject(doc_id)
+            if ICompletedItem.providedBy(obj):
+                result.append(obj)
     return result

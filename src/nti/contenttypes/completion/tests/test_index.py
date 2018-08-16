@@ -17,9 +17,9 @@ from hamcrest import has_property
 import unittest
 from datetime import datetime
 
-import fudge
-
 import BTrees
+
+import fudge
 
 from zope import component
 
@@ -44,6 +44,8 @@ from nti.contenttypes.completion.tests.test_models import MockCompletableItem
 
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
+from nti.contenttypes.completion.utils import get_indexed_completed_items
+
 
 class TestIndex(unittest.TestCase):
 
@@ -62,6 +64,7 @@ class TestIndex(unittest.TestCase):
         assert_that(isinstance(catalog, CompletedItemCatalog),
                     is_(True))
         assert_that(catalog, has_length(6))
+
         # test index
         catalog.force_index_doc(1, completed)
         for name in (IX_SUCCESS, IX_PRINCIPAL, IX_COMPLETIONTIME, IX_ITEM_NTIID):
@@ -69,6 +72,21 @@ class TestIndex(unittest.TestCase):
             index = getattr(index, 'index', index)
             assert_that(index,
                         has_property('documents_to_values', has_length(1)))
+
+        # test indexing
+        intids = fudge.Fake().provides('queryObject').returns(completed)
+        items = get_indexed_completed_items(users='user1',
+                                            items='completable1',
+                                            sites='unknown',
+                                            catalog=catalog,
+                                            intids=intids)
+        assert_that(items, has_length(0))
+
+        items = get_indexed_completed_items(users=(user1,),
+                                            items=(completable1,),
+                                            catalog=catalog,
+                                            intids=intids)
+        assert_that(items, has_length(1))
 
     def test_install_completed_item_catalog(self):
         intids = fudge.Fake().provides('register').has_attr(family=BTrees.family64)
