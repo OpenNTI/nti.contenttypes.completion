@@ -92,10 +92,23 @@ class CompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
             if did_remove:
                 count += 1
         return count
+    
+    def remove_principal(self, user):
+        """
+        Remove all :class:`ICompletedItem` objects for the specified user
+        """
+        key = getattr(user, 'username', None) or getattr(user, 'id', user)
+        container = self.get(key, None)
+        if container is not None:
+            container.clear()
+            del self[key]
+            return True
+        return False
+    remove_user = remove_principal
 
     def clear(self):
-        for user_container in self.values():
-            user_container.clear()
+        for username in list(self.keys()):
+            self.remove_principal(username)
         super(CompletedItemContainer, self).clear()
 
 _CompletedItemContainerFactory = an_factory(CompletedItemContainer,

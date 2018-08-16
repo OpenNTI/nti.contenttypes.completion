@@ -312,12 +312,17 @@ class ICompletedItemContainer(IContainer):
         :class:`ICompletableItem`.
         """
 
+    def remove_principal(principal):
+        """
+        Remove all :class:`ICompletableItem` objects for the given
+        principal.
+        """
+
     def remove_item(item):
         """
         Remove all :class:`ICompletedItem` objects referenced by the given
         :class:`ICompletableItem`, returning the count of removed items.
         """
-
 
 class IProgress(interface.Interface):
     """
