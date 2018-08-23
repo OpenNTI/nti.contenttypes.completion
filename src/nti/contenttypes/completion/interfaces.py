@@ -10,6 +10,7 @@ from __future__ import absolute_import
 
 # pylint: disable=inherit-non-class,expression-not-assigned
 
+from zope import component
 from zope import interface
 
 from zope.annotation.interfaces import IAttributeAnnotatable
@@ -477,3 +478,23 @@ class IContextNTIIDAdapter(interface.Interface):
     Adapts contained objects to their context NTIID.
     """
     ntiid = interface.Attribute("NTIID string")
+
+
+class ICompletables(interface.Interface):
+    """
+    A predicate to return completable objects 
+
+    These will typically be registered as named utilities
+    """
+
+    def iter_objects():
+        """
+        return an iterable of :class:`.ICompletableItem` objects
+        """
+
+
+def get_completables():
+    predicates = component.getUtilitiesFor(ICompletables)
+    for _, predicate in list(predicates):
+        for obj in predicate.iter_objects():
+            yield obj
