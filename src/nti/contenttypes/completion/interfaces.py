@@ -86,6 +86,16 @@ class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     """
 
 
+class ICompletionContextProvider(interface.Interface):
+    """
+    Something that can provide a :class: `ICompletionContext` for a specific :class: `ICompletableItem`.
+    """
+    def __call__(completableItem):
+        """
+        A callable that returns an ICompletionContext object.
+        """
+
+
 class ICompletableItemProvider(interface.Interface):
     """
     An intended subscriber provider of possible :class:`ICompletableItem` objects
