@@ -243,6 +243,13 @@ class CompletableItemDefaultRequiredPolicy(PersistentCreatedAndModifiedTimeObjec
         super(CompletableItemDefaultRequiredPolicy, self).__init__(*args, **kwargs)
         self.mime_types = OOTreeSet()
 
+    def add_mime_types(self, mime_types):
+        self.mime_types.update(mime_types)
+
+    def set_mime_types(self, mime_types):
+        self.mime_types = OOTreeSet()
+        self.mime_types.update(mime_types)
+
 
 _CompletableItemDefaultRequiredFactory = an_factory(CompletableItemDefaultRequiredPolicy,
                                                     COMPLETABLE_ITEM_DEFAULT_REQUIRED_ANNOTATION_KEY)

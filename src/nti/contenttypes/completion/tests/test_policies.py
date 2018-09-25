@@ -271,3 +271,9 @@ class TestPolicies(unittest.TestCase):
         completable_policy.mime_types.add('mime_type1')
         completable_policy.mime_types.add('mime_type2')
         assert_that(completable_policy.mime_types, has_length(2))
+
+        completable_policy.set_mime_types(['1'])
+        assert_that(completable_policy.mime_types, has_length(1))
+
+        completable_policy.add_mime_types(['2', '2'])
+        assert_that(completable_policy.mime_types, has_length(2))
