@@ -211,6 +211,18 @@ class ICompletableItemDefaultRequiredPolicy(interface.Interface):
                                 description=u"""The mime types of objects that should be
                                              required, by default, for the completion context.""")
 
+    mime_types.setTaggedValue('_ext_excluded_out', True)
+
+    def add_mime_types(mime_types):
+        """
+        Add the given mimetypes into this policy.
+        """
+
+    def set_mime_types(mime_types):
+        """
+        Set mime_types with new mime_types
+        """
+
 
 class ICompletableItemContainer(interface.Interface):
     """

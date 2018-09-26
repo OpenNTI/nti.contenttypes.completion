@@ -196,6 +196,12 @@ class TestPolicies(unittest.TestCase):
         assert_that(new_io.mime_types, contains_inanyorder(u'mime_type1',
                                                            u'mime_type2'))
 
+        # Test if the old mime_types are not unicode, they would be udpated to unicode mime_types.
+        policy = CompletableItemDefaultRequiredPolicy()
+        policy.mime_types.update([str('a'), str('b')])
+        update_from_external_object(policy, {'mime_types': [u'c']})
+        assert_that(policy.mime_types, contains_inanyorder('c'))
+
     def test_aggregate_policy_equality(self):
         completion_policy1 = CompletableItemAggregateCompletionPolicy()
         completion_policy2 = CompletableItemAggregateCompletionPolicy()
@@ -270,4 +276,10 @@ class TestPolicies(unittest.TestCase):
         completable_policy.mime_types.add('mime_type1')
         completable_policy.mime_types.add('mime_type1')
         completable_policy.mime_types.add('mime_type2')
+        assert_that(completable_policy.mime_types, has_length(2))
+
+        completable_policy.set_mime_types(['1'])
+        assert_that(completable_policy.mime_types, has_length(1))
+
+        completable_policy.add_mime_types(['2', '2'])
         assert_that(completable_policy.mime_types, has_length(2))
