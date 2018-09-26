@@ -45,14 +45,14 @@ class _CompletableItemDefaultRequiredPolicyUpdater(object):
         Make sure we store these objects in the container we choose. IO, by
         default will store in a list.
         """
-        interface_io = InterfaceObjectIO(self.obj,
-                                         ICompletableItemDefaultRequiredPolicy)
-        result = interface_io.updateFromExternalObject(parsed, *args, **kwargs)
-
+        updated = False
         if "mime_types" in parsed:
             self.obj.set_mime_types(parsed.pop('mime_types') or ())
-            result = True
-        return result
+            updated = True
+
+        interface_io = InterfaceObjectIO(self.obj,
+                                         ICompletableItemDefaultRequiredPolicy)
+        return interface_io.updateFromExternalObject(parsed, *args, **kwargs) or updated
 
 
 @component.adapter(ICompletableItemContainer)
