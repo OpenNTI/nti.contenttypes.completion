@@ -20,6 +20,8 @@ from nti.contenttypes.completion.interfaces import ICompletionContextCompletionP
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
+from nti.externalization.datastructures import InterfaceObjectIO
+
 from nti.schema.fieldproperty import createDirectFieldProperties
 
 from nti.schema.eqhash import EqHash
@@ -34,7 +36,14 @@ class AbstractCompletableItemCompletionPolicy(PersistentCreatedAndModifiedTimeOb
                                               SchemaConfigured,
                                               Contained):
     createDirectFieldProperties(ICompletableItemCompletionPolicy)
-    
+
+
+class AbstractCompletableItemCompletionPolicyIO(InterfaceObjectIO):
+    """
+    Non-persistent subclasses of AbstractCompletableItemCompletionPolicy would rely on this IO for externalization.
+    """
+    _ext_iface_upper_bound = ICompletableItemCompletionPolicy
+
 
 @EqHash('percentage')
 @interface.implementer(ICompletableItemAggregateCompletionPolicy)

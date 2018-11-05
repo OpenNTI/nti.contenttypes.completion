@@ -62,6 +62,10 @@
                          .interfaces.ICompletableItemAggregateCompletionPolicy"
         modules=".adapters .policies .completion" />
 
+    <adapter factory=".policies.AbstractCompletableItemCompletionPolicyIO"
+             for=".interfaces.ICompletableItemCompletionPolicy"
+             provides="nti.externalization.interfaces.IInternalObjectExternalizer"/>
+
     <adapter factory=".externalization._CompletableItemDefaultRequiredPolicyExternalObject"
              provides="nti.externalization.interfaces.IExternalObject"
              for=".interfaces.ICompletableItemDefaultRequiredPolicy" />
