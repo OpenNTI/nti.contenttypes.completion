@@ -37,6 +37,8 @@ class AbstractCompletableItemCompletionPolicy(PersistentCreatedAndModifiedTimeOb
                                               Contained):
     createDirectFieldProperties(ICompletableItemCompletionPolicy)
 
+    offers_completion_certificate = False
+
 
 class AbstractCompletableItemCompletionPolicyIO(InterfaceObjectIO):
     """
