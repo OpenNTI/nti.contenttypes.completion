@@ -138,7 +138,7 @@ class ICompletableItemCompletionPolicy(IContained):
     conditions in which the :class:`ICompletableItem' object can be
     considered complete.
     """
-    
+
     offers_completion_certificate = Bool(title=u'Offers Completion Certificate',
                                          description=u"""Whether a certificate is offered
                                          for the completion of the completion-context.""",
@@ -400,6 +400,16 @@ class ICompletionContextProgress(IProgress):
                            title=u"The completed item for this context, if applicable",
                            required=False)
 
+    UnsuccessfulItemNTIIDs = UniqueIterable(value_type=ValidNTIID(title=u'the ntiid'),
+                                            title=u"Failed item ntiids",
+                                            description=u"""NTIIDs of objects the user completed, but
+                                                          not successfully.""")
+
+    IncompleteItemNTIIDs = UniqueIterable(value_type=ValidNTIID(title=u'the ntiid'),
+                                            title=u"Incomplete item ntiids",
+                                            description=u"""NTIIDs of objects the user has started, but
+                                                        not yet completed.""")
+
     Completed = Bool(title=u"Indicates the user has completed this item.",
                      default=False)
 
@@ -465,7 +475,7 @@ class ISiteAdapter(interface.Interface):
     Adapts contained objects to their site.
     """
     site = interface.Attribute("site string")
-    
+
 
 class IPrincipalAdapter(interface.Interface):
     """
@@ -504,7 +514,7 @@ class IContextNTIIDAdapter(interface.Interface):
 
 class ICompletables(interface.Interface):
     """
-    A predicate to return completable objects 
+    A predicate to return completable objects
 
     These will typically be registered as named utilities
     """

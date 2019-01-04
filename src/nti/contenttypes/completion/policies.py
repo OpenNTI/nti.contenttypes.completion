@@ -40,7 +40,8 @@ class AbstractCompletableItemCompletionPolicy(PersistentCreatedAndModifiedTimeOb
 
 class AbstractCompletableItemCompletionPolicyIO(InterfaceObjectIO):
     """
-    Non-persistent subclasses of AbstractCompletableItemCompletionPolicy would rely on this IO for externalization.
+    Non-persistent subclasses of AbstractCompletableItemCompletionPolicy would
+    rely on this IO for externalization.
     """
     _ext_iface_upper_bound = ICompletableItemCompletionPolicy
 
@@ -62,9 +63,11 @@ class CompletableItemAggregateCompletionPolicy(AbstractCompletableItemCompletion
             if progress is not None and progress.MaxPossibleProgress:
                 ratio = progress.AbsoluteProgress / progress.MaxPossibleProgress
                 if ratio >= self.percentage:
+                    success = bool(getattr(progress, 'UnsuccessfulItemNTIIDs', True))
                     result = CompletedItem(Item=progress.Item,
                                            Principal=progress.User,
-                                           CompletedDate=progress.LastModified)
+                                           CompletedDate=progress.LastModified,
+                                           Success=success)
             else:
                 # This case should be avoided...
                 # Required percentage but not given a denominator

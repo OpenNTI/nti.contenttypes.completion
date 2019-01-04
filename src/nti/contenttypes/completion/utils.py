@@ -51,7 +51,10 @@ def update_completion(obj, ntiid, user, context):
         logger.warning('No container found for progress update (%s) (%s)',
                        ntiid, context)
         return
-    if ntiid not in principal_container:
+    # Update completion if the user has no completion or
+    # if they have not completed the item successfully.
+    if     ntiid not in principal_container \
+        or not principal_container[ntiid].Success:
         policy = component.getMultiAdapter((obj, context),
                                            ICompletableItemCompletionPolicy)
         progress = component.queryMultiAdapter((user, obj, context),
@@ -59,6 +62,8 @@ def update_completion(obj, ntiid, user, context):
         if progress is not None:
             completed_item = policy.is_complete(progress)
             if completed_item is not None:
+                # Pop the old value
+                principal_container.remove_item(obj)
                 # The completed item we get may be different from the given
                 # obj.
                 logger.info('Marking item complete (ntiid=%s) (user=%s) (item=%s)',
