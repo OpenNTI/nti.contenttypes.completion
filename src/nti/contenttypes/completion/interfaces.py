@@ -86,6 +86,12 @@ class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     """
 
 
+class ICompletionContextCompletedItem(ICompletedItem):
+    """
+    A :class:`ICompletedItem` for a :class:`ICompletionContext`.
+    """
+
+
 class ICompletionContextProvider(interface.Interface):
     """
     Something that can provide a :class: `ICompletionContext` for a specific :class: `ICompletableItem`.

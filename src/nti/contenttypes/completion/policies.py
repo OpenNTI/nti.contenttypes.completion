@@ -63,7 +63,7 @@ class CompletableItemAggregateCompletionPolicy(AbstractCompletableItemCompletion
             if progress is not None and progress.MaxPossibleProgress:
                 ratio = progress.AbsoluteProgress / progress.MaxPossibleProgress
                 if ratio >= self.percentage:
-                    success = bool(getattr(progress, 'UnsuccessfulItemNTIIDs', True))
+                    success = bool(not getattr(progress, 'UnsuccessfulItemNTIIDs', ()))
                     result = CompletedItem(Item=progress.Item,
                                            Principal=progress.User,
                                            CompletedDate=progress.LastModified,
