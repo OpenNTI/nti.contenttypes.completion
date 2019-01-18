@@ -293,6 +293,6 @@ class TestPolicies(unittest.TestCase):
 
     def test_completion_policy_configuration_utility(self):
         config = component.getUtility(ICompletionContextCompletionPolicyConfigurationUtility)
-        assert_that(config.is_editting_completion_policy_open(MockCompletionContext()), is_(True))
-        assert_that(config.is_editting_completion_policy_open(MockCompletableItem(u'ntiid')), is_(False))
-        assert_that(config.is_editting_completion_policy_open(None), is_(False))
+        assert_that(config.can_edit_completion_policy(MockCompletionContext()), is_(True))
+        assert_that(config.can_edit_completion_policy(MockCompletableItem(u'ntiid')), is_(False))
+        assert_that(config.can_edit_completion_policy(None), is_(False))

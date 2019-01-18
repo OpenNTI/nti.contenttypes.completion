@@ -226,16 +226,17 @@ class CompletionContextCompletionPolicyContainer(CaseInsensitiveCheckingLastModi
     """
     createDirectFieldProperties(ICompletionContextCompletionPolicyContainer)
 
-    def set_context_policy(self, context_policy=None):
+    def set_context_policy(self, context_policy=None, do_notify=True):
         self.context_policy = context_policy
         if context_policy is not None:
             context_policy.__parent__ = self
             interface.alsoProvides(context_policy, ICompletionContextCompletionPolicy)
 
         # fire update events.
-        completion_context = self.__parent__
-        if completion_context is not None:
-            notify(CompletionContextCompletionPolicyUpdated(completion_context=completion_context))
+        if do_notify is True:
+            completion_context = self.__parent__
+            if completion_context is not None:
+                notify(CompletionContextCompletionPolicyUpdated(completion_context=completion_context))
 
 
 _CompletionContextCompletionPolicyContainerFactory = an_factory(CompletionContextCompletionPolicyContainer,

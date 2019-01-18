@@ -205,15 +205,15 @@ class ICompletionContextCompletionPolicyContainer(IContainer):
 
     context_policy.setTaggedValue('_ext_excluded_out', True)
 
-    def set_context_policy(context_policy):
+    def set_context_policy(context_policy, do_notify=True):
         """
-        Update the context_policy.
+        Update the context_policy, and fire :class:`ICompletionContextCompletionPolicyUpdated` if do_notify is True.
         """
 
 
 class ICompletionContextCompletionPolicyConfigurationUtility(interface.Interface):
 
-    def is_editting_completion_policy_open(completion_context):
+    def can_edit_completion_policy(completion_context):
         """
         Determining if completion policy for a :class: `ICompletionContext` is open to be edited,
         currently we use this to determine if an edit link should decorated on the completion policy object.

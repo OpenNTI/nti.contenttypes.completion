@@ -109,5 +109,5 @@ class NoOpCompletionContextCompletionPolicyFactory(SchemaConfigured):
 @interface.implementer(ICompletionContextCompletionPolicyConfigurationUtility)
 class DefaultCompletionPolicyConfigurationUtility(object):
 
-    def is_editting_completion_policy_open(self, completion_context):
+    def can_edit_completion_policy(self, completion_context):
         return ICompletionContext.providedBy(completion_context)
