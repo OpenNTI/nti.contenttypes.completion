@@ -203,6 +203,40 @@ class ICompletionContextCompletionPolicyContainer(IContainer):
                             description=u"The principal who completed the item",
                             required=False)
 
+    context_policy.setTaggedValue('_ext_excluded_out', True)
+
+    def set_context_policy(context_policy):
+        """
+        Update the context_policy.
+        """
+
+
+class ICompletionContextCompletionPolicyConfigurationUtility(interface.Interface):
+
+    def is_editting_completion_policy_open(completion_context):
+        """
+        Determining if completion policy for a :class: `ICompletionContext` is open to be edited,
+        currently we use this to determine if an edit link should decorated on the completion policy object.
+        """
+
+
+class ICompletionContextCompletionPolicyUpdated(interface.Interface):
+    """
+    When a :class:`ICompletionContextCompletionPolicy` is added or reset for a :class:`ICompletionContext`,
+    it would fire this event. currently use this to override section's CompletionPolicy when parent's changed.
+    """
+    completion_context = Object(ICompletionContext,
+                                title=u'The completion context',
+                                description=u'The context whose completion policy is updated',
+                                required=True)
+
+
+@interface.implementer(ICompletionContextCompletionPolicyUpdated)
+class CompletionContextCompletionPolicyUpdated(object):
+
+    def __init__(self, completion_context):
+        self.completion_context = completion_context
+
 
 class ICompletableItemDefaultRequiredPolicy(interface.Interface):
     """

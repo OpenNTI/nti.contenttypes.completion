@@ -14,9 +14,11 @@ from zope.container.contained import Contained
 
 from nti.contenttypes.completion.completion import CompletedItem
 
+from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemAggregateCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyFactory
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyConfigurationUtility
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
@@ -52,6 +54,8 @@ class CompletableItemAggregateCompletionPolicy(AbstractCompletableItemCompletion
     createDirectFieldProperties(ICompletableItemAggregateCompletionPolicy)
 
     mimeType = mime_type = "application/vnd.nextthought.completion.aggregatecompletionpolicy"
+
+    creator = None
 
     def is_complete(self, progress):
         """
@@ -100,3 +104,10 @@ class NoOpCompletionContextCompletionPolicyFactory(SchemaConfigured):
 
     def __call__(self):
         return None
+
+
+@interface.implementer(ICompletionContextCompletionPolicyConfigurationUtility)
+class DefaultCompletionPolicyConfigurationUtility(object):
+
+    def is_editting_completion_policy_open(self, completion_context):
+        return ICompletionContext.providedBy(completion_context)
