@@ -14,6 +14,7 @@ from hamcrest import contains
 from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
+from hamcrest import same_instance
 from hamcrest import contains_inanyorder
 
 from nti.testing.matchers import validly_provides
@@ -24,6 +25,7 @@ import unittest
 
 from datetime import datetime
 
+from zope import component
 from zope.schema.interfaces import ValidationError
 
 from nti.contenttypes.completion.adapters import CompletionContextCompletionPolicyContainer
@@ -31,6 +33,8 @@ from nti.contenttypes.completion.adapters import CompletableItemDefaultRequiredP
 
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemAggregateCompletionPolicy
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyConfigurationUtility
 
 from nti.contenttypes.completion.policies import CompletableItemAggregateCompletionPolicy
 
@@ -160,8 +164,11 @@ class TestPolicies(unittest.TestCase):
 
         mock_find_object.is_callable().returns(object())
         new_io = factory()
+        ext_obj = to_external_object(container)
         update_from_external_object(new_io, ext_obj)
         assert_that(new_io.context_policy, not_none())
+        assert_that(new_io.context_policy.__parent__, same_instance(new_io))
+        assert_that(ICompletionContextCompletionPolicy.providedBy(new_io.context_policy), is_(True))
         assert_that(new_io, has_length(1))
         assert_that(new_io.get('ntiid1'), not_none())
         assert_that(new_io.get('ntiid1').percentage, is_(.25))
@@ -283,3 +290,9 @@ class TestPolicies(unittest.TestCase):
 
         completable_policy.add_mime_types(['2', '2'])
         assert_that(completable_policy.mime_types, has_length(2))
+
+    def test_completion_policy_configuration_utility(self):
+        config = component.getUtility(ICompletionContextCompletionPolicyConfigurationUtility)
+        assert_that(config.can_edit_completion_policy(MockCompletionContext()), is_(True))
+        assert_that(config.can_edit_completion_policy(MockCompletableItem(u'ntiid')), is_(False))
+        assert_that(config.can_edit_completion_policy(None), is_(False))

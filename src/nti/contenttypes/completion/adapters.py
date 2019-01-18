@@ -18,6 +18,8 @@ from zope import interface
 
 from zope.annotation import factory as an_factory
 
+from zope.event import notify
+
 from zope.security.interfaces import IPrincipal
 
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
@@ -37,6 +39,7 @@ from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
+from nti.contenttypes.completion.interfaces import CompletionContextCompletionPolicyUpdated
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
 from nti.schema.fieldproperty import createDirectFieldProperties
@@ -222,6 +225,18 @@ class CompletionContextCompletionPolicyContainer(CaseInsensitiveCheckingLastModi
     Stores mappings of ntiid -> ICompletionPolicy for a completable item.
     """
     createDirectFieldProperties(ICompletionContextCompletionPolicyContainer)
+
+    def set_context_policy(self, context_policy=None, do_notify=True):
+        self.context_policy = context_policy
+        if context_policy is not None:
+            context_policy.__parent__ = self
+            interface.alsoProvides(context_policy, ICompletionContextCompletionPolicy)
+
+        # fire update events.
+        if do_notify is True:
+            completion_context = self.__parent__
+            if completion_context is not None:
+                notify(CompletionContextCompletionPolicyUpdated(completion_context=completion_context))
 
 
 _CompletionContextCompletionPolicyContainerFactory = an_factory(CompletionContextCompletionPolicyContainer,

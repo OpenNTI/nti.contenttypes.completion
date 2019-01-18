@@ -97,6 +97,10 @@ class _CompletionContextCompletionPolicyContainerUpdater(InterfaceObjectIO):
         Make sure we store these objects in the container we choose. IO, by
         default will store in a list.
         """
+        if 'context_policy' in parsed:
+            context_policy = parsed.pop('context_policy')
+            self._ext_self.set_context_policy(context_policy)
+
         result = super(_CompletionContextCompletionPolicyContainerUpdater, self).updateFromExternalObject(parsed, *args, **kwargs)
         container = parsed.get(ITEMS) or {}
         for container_key, policy in container.items():
@@ -109,9 +113,5 @@ class _CompletionContextCompletionPolicyContainerUpdater(InterfaceObjectIO):
             policy_obj = factory()
             update_from_external_object(policy_obj, policy)
             self._ext_self[container_key] = policy_obj
-        if self._ext_self.context_policy is not None:
-            # Set completion context policy features
-            interface.alsoProvides(self._ext_self.context_policy,
-                                   ICompletionContextCompletionPolicy)
-            self._ext_self.context_policy.__parent__ = self._ext_self
+
         return result

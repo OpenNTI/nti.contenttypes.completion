@@ -97,6 +97,10 @@
     <utility factory=".policies.CompletionContextCompletionPolicyFactory"
              provides=".interfaces.ICompletionContextCompletionPolicyFactory" />
 
+    <!-- Default Completion Policy configuration -->
+    <utility factory=".policies.DefaultCompletionPolicyConfigurationUtility"
+             provides=".interfaces.ICompletionContextCompletionPolicyConfigurationUtility" />
+
 	<!-- Index  -->
 	<adapter factory=".adapters._completed_item_to_success" />
 	<adapter factory=".adapters._completed_item_to_principal" />
