@@ -44,7 +44,7 @@ from nti.contenttypes.completion.tests.test_models import MockCompletableItem
 from nti.contenttypes.completion.tests.test_models import MockCompletionContext
 
 from nti.externalization.externalization import to_external_object
-from nti.externalization.externalization import StandardExternalFields
+from nti.externalization.interfaces import StandardExternalFields
 
 from nti.externalization.internalization import update_from_external_object
 
@@ -355,7 +355,7 @@ class TestCompletion(unittest.TestCase):
         completable_container.clear()
         assert_that(completable_container.get_optional_item_count(), is_(0))
         assert_that(completable_container.get_required_item_count(), is_(0))
-        
+
         # Cannot find object
         mock_find_object.is_callable().returns(None)
         factory = find_factory_for(ext_obj)

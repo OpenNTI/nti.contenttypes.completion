@@ -9,14 +9,12 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 from zope import component
-from zope import interface
 
 from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import IUserProgressRemovedEvent
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
-from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyFactory
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
