@@ -15,6 +15,7 @@ from zope import component
 from zope.intid.interfaces import IIntIds
 
 from nti.contenttypes.completion.index import IX_SITE
+from nti.contenttypes.completion.index import IX_SUCCESS
 from nti.contenttypes.completion.index import IX_PRINCIPAL
 from nti.contenttypes.completion.index import IX_ITEM_NTIID
 from nti.contenttypes.completion.index import IX_CONTEXT_NTIID
@@ -139,7 +140,7 @@ def get_required_completable_items_for_user(user, context):
 
 
 def get_indexed_completed_items(users=(), contexts=(), items=(), sites=(),
-                                catalog=None, intids=None):
+                                catalog=None, intids=None, success=None):
     """
     Return completed items according to the parameters
     """
@@ -172,6 +173,9 @@ def get_indexed_completed_items(users=(), contexts=(), items=(), sites=(),
             values = values.split(',')
         values = {getattr(x, 'ntiid', x) for x in values}
         query[index] = {'any_of': values}
+
+    if success is not None:
+        query[IX_SUCCESS] = {'any_of': (success,)}
 
     if query:  # perform query
         intids = component.getUtility(IIntIds) if intids is None else intids
