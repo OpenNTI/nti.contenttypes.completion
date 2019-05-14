@@ -8,6 +8,7 @@ entry_points = {
 
 TESTS_REQUIRE = [
     'fudge',
+    'nti.dataserver[test]',
     'nti.testing',
     'zope.dottedname',
     'zope.testrunner',
@@ -56,6 +57,7 @@ setup(
         'nti.containers',
         'nti.dublincore',
         'nti.externalization',
+	'nti.mimetype',
         'nti.property',
         'nti.schema',
         'nti.wref',
