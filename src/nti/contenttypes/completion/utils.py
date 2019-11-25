@@ -12,6 +12,8 @@ import six
 
 from zope import component
 
+from zope.event import notify
+
 from zope.intid.interfaces import IIntIds
 
 from nti.contenttypes.completion.index import IX_SITE
@@ -19,12 +21,14 @@ from nti.contenttypes.completion.index import IX_SUCCESS
 from nti.contenttypes.completion.index import IX_PRINCIPAL
 from nti.contenttypes.completion.index import IX_ITEM_NTIID
 from nti.contenttypes.completion.index import IX_CONTEXT_NTIID
+
 from nti.contenttypes.completion.index import get_completed_item_catalog
 
 from nti.contenttypes.completion.interfaces import IProgress
 from nti.contenttypes.completion.interfaces import ICompletedItem
 from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import ICompletableItemProvider
+from nti.contenttypes.completion.interfaces import UserProgressUpdatedEvent
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IRequiredCompletableItemProvider
 from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
@@ -32,6 +36,29 @@ from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContai
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 
 logger = __import__('logging').getLogger(__name__)
+
+
+def is_item_required(item, context):
+    """
+    Returns a bool if the given item is `required` in this
+    :class:`ICompletionContext`.
+    :param item: the :class:`ICompletableItem`
+    :param context: the :class:`ICompletionContext`
+    """
+    if not ICompletableItem.providedBy(item):
+        return False
+    required_container = ICompletableItemContainer(context)
+    default_policy = ICompletableItemDefaultRequiredPolicy(context)
+    # pylint: disable=too-many-function-args
+    if required_container.is_item_required(item):
+        result = True
+    elif required_container.is_item_optional(item):
+        result = False
+    else:
+        item_mime_type = getattr(item, 'mime_type', '')
+        # pylint: disable=unsupported-membership-test
+        result = item_mime_type in default_policy.mime_types
+    return result
 
 
 def update_completion(obj, ntiid, user, context):
@@ -72,29 +99,13 @@ def update_completion(obj, ntiid, user, context):
                 assert ICompletedItem.providedBy(completed_item), \
                        "Must have completed item"
                 principal_container[ntiid] = completed_item
-
-
-def is_item_required(item, context):
-    """
-    Returns a bool if the given item is `required` in this
-    :class:`ICompletionContext`.
-    :param item: the :class:`ICompletableItem`
-    :param context: the :class:`ICompletionContext`
-    """
-    if not ICompletableItem.providedBy(item):
-        return False
-    required_container = ICompletableItemContainer(context)
-    default_policy = ICompletableItemDefaultRequiredPolicy(context)
-    # pylint: disable=too-many-function-args
-    if required_container.is_item_required(item):
-        result = True
-    elif required_container.is_item_optional(item):
-        result = False
-    else:
-        item_mime_type = getattr(item, 'mime_type', '')
-        # pylint: disable=unsupported-membership-test
-        result = item_mime_type in default_policy.mime_types
-    return result
+                # We broadcast for the context if we have a successfully completed
+                # item where we did not before.
+                if      completed_item.Success \
+                    and is_item_required(obj, context):
+                    notify(UserProgressUpdatedEvent(obj=context,
+                                                    user=user,
+                                                    context=context))
 
 
 def get_completed_item(user, context, item):

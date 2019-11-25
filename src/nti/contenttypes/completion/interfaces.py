@@ -507,6 +507,27 @@ class UserProgressRemovedEvent(AbstractUserProgressEvent):
     pass
 
 
+class ICompletionContextCompletedEvent(IObjectEvent):
+    """
+    An event indicating this user has successfully completed
+    the :class:`ICompletionContext`.
+    """
+    user = Object(IPrincipal, title=u"principal", required=True)
+
+    context = Object(ICompletionContext,
+                     title=u"Completion context",
+                     required=True)
+
+
+@interface.implementer(ICompletionContextCompletedEvent)
+class CompletionContextCompletedEvent(ObjectEvent):
+
+    context = alias('object')
+
+    def __init__(self, context, user):
+        super(CompletionContextCompletedEvent, self).__init__(context)
+        self.user = user
+
 # catalog
 
 
