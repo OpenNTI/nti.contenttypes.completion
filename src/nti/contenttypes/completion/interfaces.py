@@ -331,6 +331,15 @@ class IPrincipalCompletedItemContainer(IContainer, IContained):
                        description=u"The user principal has completed these items.",
                        required=True)
 
+    # We persistently store the completion context completed item here.
+    # Currently, we *only* use this to broadcast context completed state the
+    # *first* this occurs. We do not use then to indicate current context
+    # completion state. To do so correctly, we need more questions answered
+    # wrt changing requirement states.
+    ContextCompletedItem = Object(ICompletionContextCompletedItem,
+                                  title=u'The completion context completed item',
+                                  required=False)
+
     def add_completed_item(completed_item):
         """
         Add a :class:`ICompletedItem` to the container.
