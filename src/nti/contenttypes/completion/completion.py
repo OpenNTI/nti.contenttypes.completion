@@ -94,6 +94,8 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained):
     __name__ = None
     _item = None
     _item_ntiid = None
+    Success = False
+    CompletedDate = None
 
     user = alias('Principal')
     item_ntiid = alias('ItemNTIID')
