@@ -86,8 +86,7 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
 
 @WithRepr
 @interface.implementer(ICompletedItem)
-class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaConfigured):
-    createDirectFieldProperties(ICompletedItem)
+class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained):
 
     __external_can_create__ = False
 
@@ -101,9 +100,11 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained, SchemaCon
 
     mimeType = mime_type = "application/vnd.nextthought.completion.completeditem"
 
-    # pylint: disable=keyword-arg-before-vararg,super-init-not-called
-    def __init__(self, Principal=None, Item=None, *args, **kwargs):
-        SchemaConfigured.__init__(self, *args, **kwargs)
+    def __init__(self, Principal=None, Item=None, Success=True, CompletedDate=None, *args, **kwargs):
+        # See not in Progress about why this is not schema configured.
+        super(CompletedItem, self).__init__(*args, **kwargs)
+        self.Success = Success
+        self.CompletedDate = CompletedDate
         self._item = IWeakRef(Item)
         self._item_ntiid = Item.ntiid
         self.Principal = IPrincipal(Principal)

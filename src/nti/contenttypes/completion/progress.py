@@ -21,17 +21,16 @@ from nti.externalization.representation import WithRepr
 
 from nti.property.property import alias
 
-from nti.schema.fieldproperty import createDirectFieldProperties
-
-from nti.schema.schema import SchemaConfigured
-
 logger = __import__('logging').getLogger(__name__)
 
 
 @WithRepr
 @interface.implementer(IProgress)
-class Progress(SchemaConfigured):
-    createDirectFieldProperties(IProgress)
+class Progress(object):
+    # There are use cases where lots of these may be created. Therefore,
+    # we skip SchemaConfigured here to improve throughput. We're responsible
+    # for setting our defaults and any validation. Since these are only built
+    # internally, we at least have control over our fate.
 
     __external_can_create__ = False
 
@@ -41,8 +40,9 @@ class Progress(SchemaConfigured):
     last_modified = alias('LastModified')
     ntiid = alias('NTIID')
 
-    # pylint: disable=keyword-arg-before-vararg
-    def __init__(self, User=None, LastModified=None, *args, **kwargs):
+    def __init__(self, User=None, LastModified=None, AbsoluteProgress=None,
+                 MaxPossibleProgress=None, HasProgress=False, NTIID=None,
+                 Item=None, CompletionContext=None):
         last_mod = LastModified
         if LastModified is not None:
             try:
@@ -51,9 +51,14 @@ class Progress(SchemaConfigured):
                 pass
         if User is not None:
             User = IPrincipal(User)
-        kwargs['User'] = User
-        kwargs['LastModified'] = last_mod
-        super(Progress, self).__init__(*args, **kwargs)
+        self.User = User
+        self.LastModified = last_mod
+        self.AbsoluteProgress = AbsoluteProgress
+        self.MaxPossibleProgress = MaxPossibleProgress
+        self.HasProgress = HasProgress
+        self.NTIID = NTIID
+        self.Item = Item
+        self.CompletionContext = CompletionContext
 
     @property
     def PercentageProgress(self):
@@ -66,16 +71,19 @@ class Progress(SchemaConfigured):
 
 @WithRepr
 @interface.implementer(ICompletionContextProgress)
-class CompletionContextProgress(Progress, SchemaConfigured):
-    createDirectFieldProperties(ICompletionContextProgress)
+class CompletionContextProgress(Progress):
 
     __external_can_create__ = False
 
     __external_class_name__ = "CompletionContextProgress"
     mimeType = mime_type = "application/vnd.nextthought.completion.completioncontextprogress"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, CompletedItem=None, UnsuccessfulItemNTIIDs=None,
+                 IncompleteItemNTIIDs=None, *args, **kwargs):
         super(CompletionContextProgress, self).__init__(*args, **kwargs)
+        self.CompletedItem = CompletedItem
+        self.UnsuccessfulItemNTIIDs = UnsuccessfulItemNTIIDs
+        self.IncompleteItemNTIIDs = IncompleteItemNTIIDs
 
     @property
     def Completed(self):
