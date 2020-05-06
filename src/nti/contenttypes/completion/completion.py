@@ -103,7 +103,7 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained):
     mimeType = mime_type = "application/vnd.nextthought.completion.completeditem"
 
     def __init__(self, Principal=None, Item=None, Success=True, CompletedDate=None, *args, **kwargs):
-        # See not in Progress about why this is not schema configured.
+        # See note in Progress about why this is not schema configured.
         super(CompletedItem, self).__init__(*args, **kwargs)
         self.Success = Success
         self.CompletedDate = CompletedDate
