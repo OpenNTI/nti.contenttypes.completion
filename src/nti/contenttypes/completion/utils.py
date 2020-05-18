@@ -150,10 +150,10 @@ def get_required_completable_items_for_user(user, context):
     return result
 
 
-def get_indexed_completed_items(users=(), contexts=(), items=(), sites=(),
-                                catalog=None, intids=None, success=None):
+def get_indexed_completed_items_intids(users=(), contexts=(), items=(), sites=(),
+                                       catalog=None, success=None):
     """
-    Return completed items according to the parameters
+    Return the intid result set of completed items according to the parameters.
     """
     query = {}
     result = []
@@ -188,10 +188,16 @@ def get_indexed_completed_items(users=(), contexts=(), items=(), sites=(),
     if success is not None:
         query[IX_SUCCESS] = {'any_of': (success,)}
 
-    if query:  # perform query
-        intids = component.getUtility(IIntIds) if intids is None else intids
-        for doc_id in catalog.apply(query) or ():
-            obj = intids.queryObject(doc_id)
-            if ICompletedItem.providedBy(obj):
-                result.append(obj)
+    if query:
+        result = catalog.apply(query)
     return result
+
+
+def get_indexed_completed_items(intids=None, **kwargs):
+    """
+    Return the reified result set of completed items according to the parameters.
+    """
+    intids = component.getUtility(IIntIds) if intids is None else intids
+    rs = get_indexed_completed_items_intids(**kwargs)
+    items = (intids.queryObject(x) for x in rs)
+    return [x for x in items if ICompletedItem.providedBy(x)]
