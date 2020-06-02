@@ -193,11 +193,11 @@ def get_indexed_completed_items_intids(users=(), contexts=(), items=(), sites=()
     return result
 
 
-def get_indexed_completed_items(intids=None, *args, **kwargs):
+def get_indexed_completed_items(users=None, intids=None, *args, **kwargs):
     """
     Return the reified result set of completed items according to the parameters.
     """
     intids = component.getUtility(IIntIds) if intids is None else intids
-    rs = get_indexed_completed_items_intids(*args, **kwargs)
+    rs = get_indexed_completed_items_intids(users=users, *args, **kwargs)
     items = (intids.queryObject(x) for x in rs)
     return [x for x in items if ICompletedItem.providedBy(x)]
