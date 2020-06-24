@@ -456,8 +456,7 @@ class ICompletionContextProgress(IProgress):
 
     IncompleteItemNTIIDs = UniqueIterable(value_type=ValidNTIID(title=u'the ntiid'),
                                             title=u"Incomplete item ntiids",
-                                            description=u"""NTIIDs of objects the user has started, but
-                                                        not yet completed.""")
+                                            description=u"""NTIIDs of objects the user has not yet completed.""")
 
     Completed = Bool(title=u"Indicates the user has completed this item.",
                      default=False)
