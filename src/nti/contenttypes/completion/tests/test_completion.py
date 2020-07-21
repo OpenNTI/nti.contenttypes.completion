@@ -24,6 +24,8 @@ from datetime import datetime
 
 from zope import component
 
+from zope.dublincore.interfaces import IWriteZopeDublinCore
+
 from nti.contenttypes.completion.completion import CompletedItem
 
 from nti.contenttypes.completion.interfaces import ICompletedItem
@@ -43,12 +45,14 @@ from nti.contenttypes.completion.tests.test_models import MockUser
 from nti.contenttypes.completion.tests.test_models import MockCompletableItem
 from nti.contenttypes.completion.tests.test_models import MockCompletionContext
 
+from nti.dublincore.interfaces import NoOpDublinCoreAdapter
+
 from nti.externalization.externalization import to_external_object
+
 from nti.externalization.interfaces import StandardExternalFields
 
-from nti.externalization.internalization import update_from_external_object
-
 from nti.externalization.internalization import find_factory_for
+from nti.externalization.internalization import update_from_external_object
 
 CLASS = StandardExternalFields.CLASS
 ITEMS = StandardExternalFields.ITEMS
@@ -91,6 +95,8 @@ class TestCompletion(unittest.TestCase):
         assert_that(completed_container, not_none())
         assert_that(completed_container,
                     validly_provides(ICompletedItemContainer))
+        zdc_data = IWriteZopeDublinCore(completed_container)
+        assert_that(zdc_data, is_(NoOpDublinCoreAdapter))
 
         user_container = component.queryMultiAdapter((user1, completion_context),
                                                      IPrincipalCompletedItemContainer)
