@@ -90,7 +90,8 @@
              provides="nti.externalization.interfaces.IInternalObjectUpdater"
              for=".interfaces.ICompletionContextCompletionPolicyContainer" />
 
-    <adapter factory="nti.dublincore.interfaces.NoOpDublinCoreAdapter"
+    <!-- XXX: Added to a live database. Need to clean up unused data -->
+    <adapter factory="nti.dublincore.annotatableadapter.none_dublincore_adapter"
              provides="zope.dublincore.interfaces.IWriteZopeDublinCore"
              for="nti.contenttypes.completion.interfaces.ICompletedItemContainer" />
 

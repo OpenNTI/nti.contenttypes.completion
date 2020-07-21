@@ -45,8 +45,6 @@ from nti.contenttypes.completion.tests.test_models import MockUser
 from nti.contenttypes.completion.tests.test_models import MockCompletableItem
 from nti.contenttypes.completion.tests.test_models import MockCompletionContext
 
-from nti.dublincore.interfaces import NoOpDublinCoreAdapter
-
 from nti.externalization.externalization import to_external_object
 
 from nti.externalization.interfaces import StandardExternalFields
@@ -95,8 +93,8 @@ class TestCompletion(unittest.TestCase):
         assert_that(completed_container, not_none())
         assert_that(completed_container,
                     validly_provides(ICompletedItemContainer))
-        zdc_data = IWriteZopeDublinCore(completed_container)
-        assert_that(zdc_data, is_(NoOpDublinCoreAdapter))
+        assert_that(IWriteZopeDublinCore(completed_container, None),
+                    none())
 
         user_container = component.queryMultiAdapter((user1, completion_context),
                                                      IPrincipalCompletedItemContainer)
