@@ -14,6 +14,8 @@
 	<include package="nti.wref" />
 	<include package="nti.mimetype" />
 
+	<include package="." file="meta.zcml" />
+
     <adapter factory=".adapters.CompletedItemContainerFactory"
              provides=".interfaces.ICompletedItemContainer"
              for=".interfaces.ICompletionContext" />

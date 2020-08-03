@@ -37,6 +37,7 @@ logger = __import__('logging').getLogger(__name__)
 class AbstractCompletableItemCompletionPolicy(PersistentCreatedAndModifiedTimeObject,
                                               SchemaConfigured,
                                               Contained):
+
     createDirectFieldProperties(ICompletableItemCompletionPolicy)
 
 
