@@ -41,6 +41,8 @@ from nti.schema.field import ValidDatetime
 from nti.schema.field import ValidTextLine
 from nti.schema.field import UniqueIterable
 
+from nti.zope_catalog.interfaces import INoAutoIndexEver
+
 
 class ICompletableItem(interface.Interface):
     """
@@ -317,7 +319,7 @@ class ICompletableItemContainer(interface.Interface):
         """
 
 
-class IPrincipalCompletedItemContainer(IContainer, IContained):
+class IPrincipalCompletedItemContainer(IContainer, IContained, INoAutoIndexEver):
     """
     Contains :class:`ICompletedItem` that have been completed by a user in a
     :class:`ICompletionContext`.
