@@ -15,6 +15,7 @@ from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import same_instance
+from hamcrest import contains_string
 from hamcrest import contains_inanyorder
 
 from nti.testing.matchers import validly_provides
@@ -74,6 +75,8 @@ class TestPolicies(unittest.TestCase):
                             CompletionContext=context,
                             LastModified=now,
                             MaxPossibleProgress=25)
+        assert_that(str(progress), contains_string("MaxPossibleProgress"))
+
         ext_obj = to_external_object(progress)
         assert_that(ext_obj[CLASS], is_('Progress'))
         assert_that(ext_obj[MIMETYPE], is_('application/vnd.nextthought.completion.progress'))

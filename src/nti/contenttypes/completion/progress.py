@@ -68,6 +68,16 @@ class Progress(object):
             result = None
         return result
 
+    def __str__(self, *unused_args, **unused_kwargs):
+        clazz = self.__class__.__name__
+        result = "%s(AbsoluteProgress=%s) (MaxPossibleProgress=%s) (HasProgress=%s) (NTIID=%s)" \
+            % (clazz,
+               self.AbsoluteProgress,
+               self.MaxPossibleProgress,
+               self.HasProgress,
+               self.NTIID)
+        return result
+
 
 @WithRepr
 @interface.implementer(ICompletionContextProgress)

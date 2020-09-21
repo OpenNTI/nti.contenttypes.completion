@@ -106,6 +106,9 @@ def update_completion(obj, ntiid, user, context):
                     notify(UserProgressUpdatedEvent(obj=context,
                                                     user=user,
                                                     context=context))
+            else:
+                logger.debug('Item is not complete (ntiid=%s) (user=%s) (item=%s) (progress=%s)',
+                             ntiid, user.username, completed_item, progress)
 
 
 def get_completed_item(user, context, item):
