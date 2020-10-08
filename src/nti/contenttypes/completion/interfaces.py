@@ -193,8 +193,7 @@ class IReadonlyCompletionPolicyDefaults(interface.Interface):
     for example, when the :class:`ICompletionContextCompletionPolicy`
     is acquired or inherited from some other :class:`ICompletionContext`
     """
-# pylint: disable=no-value-for-parameter
-IReadonlyCompletionPolicyDefaults.setTaggedValue('_ext_is_marker_interface', True)
+    taggedValue('_ext_is_marker_interface', True)
 
 
 class ICompletionContextCompletionPolicyFactory(interface.Interface):
