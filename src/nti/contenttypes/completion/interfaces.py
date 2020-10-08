@@ -185,6 +185,18 @@ class ICompletionContextCompletionPolicy(interface.Interface):
 ICompletionContextCompletionPolicy.setTaggedValue('_ext_is_marker_interface', True)
 
 
+class IReadonlyCompletionPolicyDefaults(interface.Interface):
+    """
+    A marker interface for :class:`ICompletionContextCompletionPolicy`
+    indicating that the defaults provided should be treated as
+    readonly in the :class:`ICompletionContext`. This could be used,
+    for example, when the :class:`ICompletionContextCompletionPolicy`
+    is acquired or inherited from some other :class:`ICompletionContext`
+    """
+# pylint: disable=no-value-for-parameter
+IReadonlyCompletionPolicyDefaults.setTaggedValue('_ext_is_marker_interface', True)
+
+
 class ICompletionContextCompletionPolicyFactory(interface.Interface):
     """
     A callable that can be registered to generate a
