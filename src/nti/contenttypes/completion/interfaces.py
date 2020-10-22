@@ -87,6 +87,17 @@ class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     :class:`ICompletionContextCompletionPolicy`).
     """
 
+class ICompletionSubContext(ICompletionContext):
+    """
+    A :class:`ICompletionContext` that is subordinate to some higher
+    :class:`ICompletionContext`. A :class:`ICompletionSubContext` may
+    have the application of portions of its
+    :class:`ICompletionContextCompletionPolicy` inherited or
+    restricted by the :class:`IComplectionContext` we are subordinate to.
+
+    See also: https://github.com/NextThought/nti.contenttypes.completion/pull/55
+    """
+
 
 class ICompletionContextCompletedItem(ICompletedItem):
     """
@@ -126,7 +137,6 @@ class IRequiredCompletableItemProvider(interface.Interface):
         """
         A generator of :class:`ICompletableItem` objects based on the given user.
         """
-
 
 class ICompletedItemProvider(ILastModified):
     """
@@ -183,17 +193,6 @@ class ICompletionContextCompletionPolicy(interface.Interface):
     """
 # pylint: disable=no-value-for-parameter
 ICompletionContextCompletionPolicy.setTaggedValue('_ext_is_marker_interface', True)
-
-
-class IReadonlyCompletionPolicyDefaults(interface.Interface):
-    """
-    A marker interface for :class:`ICompletionContextCompletionPolicy`
-    indicating that the defaults provided should be treated as
-    readonly in the :class:`ICompletionContext`. This could be used,
-    for example, when the :class:`ICompletionContextCompletionPolicy`
-    is acquired or inherited from some other :class:`ICompletionContext`
-    """
-    taggedValue('_ext_is_marker_interface', True)
 
 
 class ICompletionContextCompletionPolicyFactory(interface.Interface):
