@@ -87,6 +87,21 @@ class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     :class:`ICompletionContextCompletionPolicy`).
     """
 
+class ICompletionSubContext(interface.Interface):
+    """
+    A marker interface that indicates this object's
+    :class:`ICompletionContext` is in some ways subordinate to some
+    higher :class:`IComplectionContext`. An :class:`ICompletionSubContext`'s
+    :class:`ICompletionContext` may have the application
+    of portions of its :class:`ICompletionContextCompletionPolicy`
+    inherited or restricted by the :class:`IComplectionContext` we are
+    subordinate to.
+
+    See also:
+    https://github.com/NextThought/nti.contenttypes.completion/pull/55
+    """
+    interface.taggedValue('_ext_is_marker_interface', True)
+
 
 class ICompletionContextCompletedItem(ICompletedItem):
     """
@@ -126,7 +141,6 @@ class IRequiredCompletableItemProvider(interface.Interface):
         """
         A generator of :class:`ICompletableItem` objects based on the given user.
         """
-
 
 class ICompletedItemProvider(ILastModified):
     """
