@@ -275,6 +275,22 @@ class TestPolicies(unittest.TestCase):
             with self.assertRaises(ValidationError):
                 completion_policy.percentage = new_percentage
 
+        # Validate success
+        completed_item = completion_policy.is_complete(much_progress)
+        assert_that(completed_item.Success, is_(True))
+        completed_item = completion_policy.is_complete(some_progress2)
+        assert_that(completed_item.Success, is_(True))
+
+        # Ratio is 18/20
+        much_progress.UnsuccessfulItemNTIIDs = ['ntiid1', 'ntiid2']
+        completed_item = completion_policy.is_complete(much_progress)
+        assert_that(completed_item.Success, is_(True))
+
+        # Ratio goes to 7/16 - so context success is false
+        some_progress2.UnsuccessfulItemNTIIDs = ['ntiid1',]
+        completed_item = completion_policy.is_complete(some_progress2)
+        assert_that(completed_item.Success, is_(False))
+
     def test_completable_policy(self):
         completable_policy = CompletableItemDefaultRequiredPolicy()
         assert_that(completable_policy,
