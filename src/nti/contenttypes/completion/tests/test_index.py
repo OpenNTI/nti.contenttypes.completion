@@ -45,6 +45,7 @@ from nti.contenttypes.completion.tests.test_models import MockCompletableItem
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
 
 from nti.contenttypes.completion.utils import get_indexed_completed_items
+from nti.contenttypes.completion.utils import get_indexed_completed_items_intids
 
 
 class TestIndex(unittest.TestCase):
@@ -87,6 +88,17 @@ class TestIndex(unittest.TestCase):
                                             catalog=catalog,
                                             intids=intids)
         assert_that(items, has_length(1))
+
+        rs = get_indexed_completed_items_intids(users=(user1,),
+                                                min_time=0,
+                                                max_time=None,
+                                                catalog=catalog)
+        assert_that(rs, has_length(1))
+        rs = get_indexed_completed_items_intids(users=(user1,),
+                                                min_time=None,
+                                                max_time=100,
+                                                catalog=catalog)
+        assert_that(rs, has_length(0))
 
     def test_install_completed_item_catalog(self):
         intids = fudge.Fake().provides('register').has_attr(family=BTrees.family64)
