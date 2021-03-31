@@ -12,6 +12,8 @@ import six
 
 from zope import component
 
+from zope.component.hooks import getSite
+
 from zope.event import notify
 
 from zope.intid.interfaces import IIntIds
@@ -21,6 +23,7 @@ from nti.contenttypes.completion.index import IX_SUCCESS
 from nti.contenttypes.completion.index import IX_PRINCIPAL
 from nti.contenttypes.completion.index import IX_ITEM_NTIID
 from nti.contenttypes.completion.index import IX_CONTEXT_NTIID
+from nti.contenttypes.completion.index import IX_COMPLETIONTIME
 
 from nti.contenttypes.completion.index import get_completed_item_catalog
 
@@ -34,6 +37,8 @@ from nti.contenttypes.completion.interfaces import IRequiredCompletableItemProvi
 from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
+
+from nti.site.site import get_component_hierarchy_names
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -154,7 +159,8 @@ def get_required_completable_items_for_user(user, context):
 
 
 def get_indexed_completed_items_intids(users=(), contexts=(), items=(), sites=(),
-                                       catalog=None, success=None):
+                                       catalog=None, success=None,
+                                       min_time=None, max_time=None):
     """
     Return the intid result set of completed items according to the parameters.
     """
@@ -176,6 +182,9 @@ def get_indexed_completed_items_intids(users=(), contexts=(), items=(), sites=()
     if sites:
         if isinstance(sites, six.string_types):
             sites = sites.split(',')
+    elif getSite() is not None:
+        sites = get_component_hierarchy_names()
+    if sites:
         query[IX_SITE] = {'any_of': sites}
 
     # process context and items
@@ -187,6 +196,9 @@ def get_indexed_completed_items_intids(users=(), contexts=(), items=(), sites=()
             values = values.split(',')
         values = {getattr(x, 'ntiid', x) for x in values}
         query[index] = {'any_of': values}
+
+    if min_time is not None or max_time is not None:
+        query[IX_COMPLETIONTIME] = {'between': (min_time, max_time)}
 
     if success is not None:
         query[IX_SUCCESS] = {'any_of': (success,)}
