@@ -10,12 +10,16 @@ from __future__ import absolute_import
 from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
+from hamcrest import contains
 from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_property
+from hamcrest import contains_inanyorder
 
 import unittest
+
 from datetime import datetime
+from datetime import timedelta
 
 import BTrees
 
@@ -64,15 +68,29 @@ class TestIndex(unittest.TestCase):
         catalog = create_completed_item_catalog(family=BTrees.family64)
         assert_that(isinstance(catalog, CompletedItemCatalog),
                     is_(True))
-        assert_that(catalog, has_length(6))
+        assert_that(catalog, has_length(7))
+
+        # test index
+        one_day_ago = now - timedelta(days=1)
+        two_days_ago = now - timedelta(days=2)
+        completed2 = CompletedItem(Principal=user1,
+                                  Item=completable1,
+                                  CompletedDate=one_day_ago,
+                                  Success=False)
+        completed3 = CompletedItem(Principal=user1,
+                                  Item=completable1,
+                                  CompletedDate=two_days_ago,
+                                  Success=False)
 
         # test index
         catalog.force_index_doc(1, completed)
+        catalog.force_index_doc(2, completed2)
+        catalog.force_index_doc(3, completed3)
         for name in (IX_SUCCESS, IX_PRINCIPAL, IX_COMPLETIONTIME, IX_ITEM_NTIID):
             index = catalog[name]
             index = getattr(index, 'index', index)
             assert_that(index,
-                        has_property('documents_to_values', has_length(1)))
+                        has_property('documents_to_values', has_length(3)))
 
         # test indexing
         intids = fudge.Fake().provides('queryObject').returns(completed)
@@ -87,18 +105,48 @@ class TestIndex(unittest.TestCase):
                                             items=(completable1,),
                                             catalog=catalog,
                                             intids=intids)
-        assert_that(items, has_length(1))
+        assert_that(items, has_length(3))
 
         rs = get_indexed_completed_items_intids(users=(user1,),
                                                 min_time=0,
                                                 max_time=None,
                                                 catalog=catalog)
-        assert_that(rs, has_length(1))
+        assert_that(rs, has_length(3))
         rs = get_indexed_completed_items_intids(users=(user1,),
                                                 min_time=None,
                                                 max_time=100,
                                                 catalog=catalog)
         assert_that(rs, has_length(0))
+
+        rs = get_indexed_completed_items_intids(users=(user1,),
+                                                min_time=now,
+                                                max_time=None,
+                                                catalog=catalog)
+        assert_that(rs, contains(1))
+
+        rs = get_indexed_completed_items_intids(users=(user1,),
+                                                min_time=one_day_ago,
+                                                max_time=None,
+                                                catalog=catalog)
+        assert_that(rs, contains_inanyorder(1, 2))
+
+        rs = get_indexed_completed_items_intids(users=(user1,),
+                                                min_time=two_days_ago,
+                                                max_time=None,
+                                                catalog=catalog)
+        assert_that(rs, contains_inanyorder(1, 2, 3))
+
+        rs = get_indexed_completed_items_intids(users=(user1,),
+                                                min_time=two_days_ago,
+                                                max_time=one_day_ago,
+                                                catalog=catalog)
+        assert_that(rs, contains_inanyorder(2, 3))
+
+        rs = get_indexed_completed_items_intids(users=(user1,),
+                                                min_time=two_days_ago,
+                                                max_time=now,
+                                                catalog=catalog)
+        assert_that(rs, contains_inanyorder(2, 3, 1))
 
     def test_install_completed_item_catalog(self):
         intids = fudge.Fake().provides('register').has_attr(family=BTrees.family64)
