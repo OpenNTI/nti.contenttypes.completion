@@ -24,6 +24,7 @@ from nti.contenttypes.completion.index import IX_PRINCIPAL
 from nti.contenttypes.completion.index import IX_ITEM_NTIID
 from nti.contenttypes.completion.index import IX_CONTEXT_NTIID
 from nti.contenttypes.completion.index import IX_COMPLETIONTIME
+from nti.contenttypes.completion.index import IX_COMPLETION_BY_DAY
 
 from nti.contenttypes.completion.index import get_completed_item_catalog
 
@@ -160,7 +161,8 @@ def get_required_completable_items_for_user(user, context):
 
 def get_indexed_completed_items_intids(users=(), contexts=(), items=(), sites=(),
                                        catalog=None, success=None,
-                                       min_time=None, max_time=None):
+                                       min_time=None, max_time=None,
+                                       by_day=False):
     """
     Return the intid result set of completed items according to the parameters.
     """
@@ -198,7 +200,8 @@ def get_indexed_completed_items_intids(users=(), contexts=(), items=(), sites=()
         query[index] = {'any_of': values}
 
     if min_time is not None or max_time is not None:
-        query[IX_COMPLETIONTIME] = {'between': (min_time, max_time)}
+        idx = IX_COMPLETIONTIME if not by_day else IX_COMPLETION_BY_DAY
+        query[idx] = {'between': (min_time, max_time)}
 
     if success is not None:
         query[IX_SUCCESS] = {'any_of': (success,)}

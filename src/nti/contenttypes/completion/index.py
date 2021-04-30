@@ -26,6 +26,7 @@ from nti.contenttypes.completion.interfaces import ICompletionTimeAdapter
 
 from nti.zope_catalog.catalog import DeferredCatalog
 
+from nti.zope_catalog.datetime import TimestampNormalizer
 from nti.zope_catalog.datetime import TimestampToNormalized64BitIntNormalizer
 
 from nti.zope_catalog.index import AttributeValueIndex
@@ -50,6 +51,9 @@ IX_CONTEXT_NTIID = 'contextNTIID'
 
 #: Completion time
 IX_COMPLETIONTIME = 'completionTime'
+
+#: Completion by day
+IX_COMPLETION_BY_DAY = 'completionByDay'
 
 #: Principal
 IX_USERNAME = IX_PRINCIPAL = 'principal'
@@ -93,6 +97,14 @@ def CompletionTimeIndex(family=BTrees.family64):
                                 normalizer=TimestampToNormalized64BitIntNormalizer())
 
 
+def CompletionByDayIndex(family=BTrees.family64):
+    resolution = TimestampNormalizer.RES_DAY
+    return NormalizationWrapper(field_name='completionTime',
+                                interface=ICompletionTimeAdapter,
+                                index=CompletionTimeRawIndex(family=family),
+                                normalizer=TimestampToNormalized64BitIntNormalizer(resolution))
+
+
 @interface.implementer(IDeferredCatalog)
 class CompletedItemCatalog(DeferredCatalog):
 
@@ -108,6 +120,7 @@ def create_completed_item_catalog(catalog=None, family=BTrees.family64):
                         (IX_PRINCIPAL, PrincipalIndex),
                         (IX_ITEM_NTIID, ItemNTIIDIndex),
                         (IX_CONTEXT_NTIID, ContextNTIIDIndex),
+                        (IX_COMPLETION_BY_DAY, CompletionByDayIndex),
                         (IX_COMPLETIONTIME, CompletionTimeIndex),):
         index = clazz(family=family)
         locate(index, catalog, name)
