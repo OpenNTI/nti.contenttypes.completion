@@ -40,3 +40,30 @@ class SharedConfiguringTestLayer(ZopeComponentLayer,
     @classmethod
     def testTearDown(cls):
         pass
+
+
+class DSSharedConfiguringTestLayer(ZopeComponentLayer,
+                                 GCLayerMixin,
+                                 ConfiguringLayerMixin):
+
+    set_up_packages = ('nti.dataserver',
+                       'nti.contenttypes.completion',
+                       'nti.contenttypes.completion.tests')
+
+    @classmethod
+    def setUp(cls):
+        setHooks()
+        cls.setUpPackages()
+
+    @classmethod
+    def tearDown(cls):
+        cls.tearDownPackages()
+        zope.testing.cleanup.cleanUp()
+
+    @classmethod
+    def testSetUp(cls, unused_test=None):
+        pass
+
+    @classmethod
+    def testTearDown(cls):
+        pass
