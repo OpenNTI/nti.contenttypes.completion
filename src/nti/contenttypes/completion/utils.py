@@ -117,6 +117,34 @@ def update_completion(obj, ntiid, user, context):
                              ntiid, user.username, completed_item, progress)
 
 
+def remove_completion(obj, ntiid, user, context):
+    """
+    For the given object and user, remove the completed state for the
+    completion context.
+
+    :param obj: the :class:`ICompletableItem`
+    :param ntiid: the ntiid of the completable item
+    :param user: the user who has updated progress on the item
+    :param context: the :class:`ICompletionContext`
+    """
+    principal_container = component.queryMultiAdapter((user, context),
+                                                      IPrincipalCompletedItemContainer)
+    if principal_container is None:
+        # Most likely gave us an empty context, which is an error case.
+        logger.warning('No container found for progress update (%s) (%s)',
+                       ntiid, context)
+        return
+
+    completed_item = principal_container.get_completed_item(obj)
+    if completed_item is not None:
+        principal_container.remove_item(obj)
+
+        if completed_item.Success and is_item_required(obj, context):
+            notify(UserProgressUpdatedEvent(obj=context,
+                                            user=user,
+                                            context=context))
+
+
 def get_completed_item(user, context, item):
     """
     Return the :class:`ICompletedItem` for the given context, user and item.
