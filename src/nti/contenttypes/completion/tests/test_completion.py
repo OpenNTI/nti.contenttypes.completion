@@ -6,13 +6,16 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 # pylint: disable=protected-access,too-many-public-methods,arguments-differ
+from contextlib import contextmanager
 
+from hamcrest import has_key
 from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
 from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
+from nti.contenttypes.completion.interfaces import IUserProgressUpdatedEvent
 
 from nti.testing.matchers import validly_provides
 from nti.testing.matchers import verifiably_provides
@@ -22,9 +25,18 @@ import unittest
 
 from datetime import datetime
 
+from ZODB.interfaces import IConnection
+
 from zope import component
+from zope.component import eventtesting
 
 from zope.dublincore.interfaces import IWriteZopeDublinCore
+
+from zope.event import notify
+from zope.lifecycleevent import IObjectAddedEvent
+from zope.lifecycleevent import IObjectRemovedEvent
+
+from zope.security.interfaces import IPrincipal
 
 from nti.contenttypes.completion.completion import CompletedItem
 
@@ -33,17 +45,30 @@ from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
-from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
+from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
+from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
+from nti.contenttypes.completion.interfaces import IProgress
+from nti.contenttypes.completion.interfaces import UserProgressRemovedEvent
 
+from nti.contenttypes.completion.policies import AbstractCompletableItemCompletionPolicy
 from nti.contenttypes.completion.policies import CompletableItemAggregateCompletionPolicy
 
+from nti.contenttypes.completion.tests import DSSharedConfiguringTestLayer
 from nti.contenttypes.completion.tests import SharedConfiguringTestLayer
+
+from nti.contenttypes.completion.tests.interfaces import ITestCompletableItem
 
 from nti.contenttypes.completion.tests.test_models import MockUser
 from nti.contenttypes.completion.tests.test_models import MockCompletableItem
 from nti.contenttypes.completion.tests.test_models import MockCompletionContext
+
+from nti.coremetadata.interfaces import IDataserver
+
+from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
+
+from nti.dataserver.users import User
 
 from nti.externalization.externalization import to_external_object
 
@@ -375,3 +400,99 @@ class TestCompletion(unittest.TestCase):
         update_from_external_object(new_io, ext_obj)
         assert_that(new_io.get_required_keys(), has_length(1))
         assert_that(new_io.get_optional_keys(), has_length(0))
+
+
+class TestRemoved(unittest.TestCase):
+
+    layer = DSSharedConfiguringTestLayer
+
+    def _static_completion_policy(self, completed_item):
+        # Always returns None
+        @component.adapter(ITestCompletableItem, ICompletionContext)
+        class MockCompletionPolicy(AbstractCompletableItemCompletionPolicy):
+
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def is_complete(self, _progress):
+                return completed_item
+
+        return MockCompletionPolicy
+
+    @WithMockDSTrans
+    def test_completion_removed(self):
+        """
+        Don't fire progress updated events on "removal" success status
+        hasn't changed.
+        """
+        completable = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable1')
+        completable.Success = True
+
+        completion_context = self.make_context()
+
+        # Mark item required
+        self._require_completable_for_context(completable, completion_context)
+
+        user = IPrincipal(User.create_user(username='completion_tester'))
+
+        # Establish progress adapter and completion policy for item that
+        # will return unsuccessfully complete item
+        progress_adapter = fudge.Fake('ProgressAdapter').is_callable().returns(object())
+        completed_item = CompletedItem(Item=completable,
+                                       Principal=user,
+                                       CompletedDate=datetime.utcnow(),
+                                       Success=True)
+        item_completion_policy = self._static_completion_policy(completed_item=completed_item)
+
+        # Ensure we have a successfully completed item in place
+        completed_container = component.queryMultiAdapter((user, completion_context),
+                                                          IPrincipalCompletedItemContainer)
+        assert_that(completed_container, has_length(0))
+
+        completed_container[completable.ntiid] = completed_item
+        assert_that(completed_container, has_key(completable.ntiid))
+
+        # Firing removal notification
+        eventtesting.clearEvents()
+        with _registered_adapter(progress_adapter,
+                                 required=(IPrincipal, ITestCompletableItem, ICompletionContext),
+                                 provided=IProgress):
+            with _registered_adapter(item_completion_policy,
+                                     provided=ICompletableItemCompletionPolicy):
+                notify(UserProgressRemovedEvent(completable, user, completion_context))
+
+        # Still have a completed item
+        assert_that(completed_container, has_length(1))
+
+        events = eventtesting.getEvents(event_type=IObjectRemovedEvent,
+                                        filter=lambda x: x.object is completed_item)
+        assert_that(events, has_length(1))
+
+        events = eventtesting.getEvents(event_type=IObjectAddedEvent,
+                                        filter=lambda x: x.object is completed_item)
+        assert_that(events, has_length(1))
+
+        # Verify progress updated even not fired
+        events = eventtesting.getEvents(event_type=IUserProgressUpdatedEvent)
+        assert_that(events, has_length(0))
+
+    def _require_completable_for_context(self, completable, completion_context):
+        completable_container = ICompletableItemContainer(completion_context)
+        completable_container.add_required_item(completable)
+        assert_that(completable_container.get_required_keys(), has_length(1))
+
+    def make_context(self):
+        ds_folder = component.getUtility(IDataserver).dataserver_folder
+        completion_context = MockCompletionContext()
+        IConnection(ds_folder).add(completion_context)
+        return completion_context
+
+
+@contextmanager
+def _registered_adapter(adapter, **kwargs):
+    gsm = component.getGlobalSiteManager()
+    gsm.registerAdapter(adapter, **kwargs)
+    try:
+        yield
+    finally:
+        gsm.unregisterAdapter(adapter, **kwargs)

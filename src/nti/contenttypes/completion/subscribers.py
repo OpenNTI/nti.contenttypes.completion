@@ -14,7 +14,6 @@ from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import IUserProgressRemovedEvent
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
-from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyFactory
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
@@ -26,12 +25,8 @@ logger = __import__('logging').getLogger(__name__)
 @component.adapter(ICompletableItem, IUserProgressRemovedEvent)
 def _progress_removed(item, event):
     if event.user is not None:
-        logger.info('Removing progress for user (%s) (item=%s)',
-                event.user, item.ntiid)
-        principal_container = component.getMultiAdapter((event.user, event.context),
-                                                        IPrincipalCompletedItemContainer)
-        principal_container.remove_item(item)
-        update_completion(item, item.ntiid, event.user, event.context)
+        update_completion(item, item.ntiid, event.user, event.context,
+                          force=True)
 
 
 def completion_context_default_policy(completion_context, unused_event=None):
