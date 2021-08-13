@@ -5,5 +5,9 @@
 		<meta:directive	name="registerCompletionPolicy"
 						schema=".zcml.IRegisterCompletionPolicy"
 						handler=".zcml.registerCompletionPolicy" />
+						
+        <meta:directive name="registerCertificateRenderer"
+                        schema=".zcml.IRegisterCertificateRenderer"
+                        handler=".zcml.registerCertificateRenderer" />
     </meta:directives>
 </configure>

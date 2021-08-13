@@ -28,6 +28,8 @@ from zope.security.interfaces import IPrincipal
 
 from nti.base.interfaces import ILastModified
 
+from nti.contenttypes.completion import CERTIFICATE_RENDERER_VOCAB_NAME
+
 from nti.ntiids.schema import ValidNTIID
 
 from nti.property.property import alias
@@ -36,6 +38,7 @@ from nti.schema.field import Bool
 from nti.schema.field import Float
 from nti.schema.field import Object
 from nti.schema.field import Number
+from nti.schema.field import Choice
 from nti.schema.field import TextLine
 from nti.schema.field import ValidDatetime
 from nti.schema.field import ValidTextLine
@@ -154,6 +157,13 @@ class ICompletedItemProvider(ILastModified):
         """
 
 
+class ICertificateRenderer(interface.Interface):
+
+    macro_name = ValidTextLine(title=u'The cert macro name',
+                               required=True,
+                               default=u'certificate')
+
+
 class ICompletableItemCompletionPolicy(IContained):
     """
     A policy for :class:`ICompletableItem` objects that determines the
@@ -166,6 +176,11 @@ class ICompletableItemCompletionPolicy(IContained):
                                          for the completion of the completion-context.""",
                                          required=True,
                                          default=False)
+    
+    certificate_renderer_name = Choice(vocabulary=CERTIFICATE_RENDERER_VOCAB_NAME,
+                                       title=u'The certificate renderer',
+                                       required=False,
+                                       default=None)
 
     def is_complete(progress):
         """
