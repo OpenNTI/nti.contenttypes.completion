@@ -28,6 +28,8 @@ from zope.security.interfaces import IPrincipal
 
 from nti.base.interfaces import ILastModified
 
+from nti.contenttypes.completion import CERTIFICATE_RENDERER_VOCAB_NAME
+
 from nti.ntiids.schema import ValidNTIID
 
 from nti.property.property import alias
@@ -175,12 +177,7 @@ class ICompletableItemCompletionPolicy(IContained):
                                          required=True,
                                          default=False)
     
-    certificate_renderer_name = ValidTextLine(title=u"The certificate name",
-                                              description=u"""The certificate name in use""",
-                                              required=False,
-                                              default=None)
-    
-    certificate_renderer_name = Choice(vocabulary='nti.contenttypes.completion.certificate_vocabulary',
+    certificate_renderer_name = Choice(vocabulary=CERTIFICATE_RENDERER_VOCAB_NAME,
                                        title=u'The certificate renderer',
                                        required=False,
                                        default=None)
