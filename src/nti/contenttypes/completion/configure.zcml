@@ -113,5 +113,12 @@
 	<adapter factory=".adapters._completed_item_to_principal" />
 	<adapter factory=".adapters._completed_item_to_item_ntiid" />
 	<adapter factory=".adapters._completed_item_to_completion_time" />
+	
+	<!-- Vocab -->
+	<include package="zope.vocabularyregistry" />
+    
+    <utility component=".vocabulary.CertificateRendererNameTokenVocabulary"
+             provides="zope.schema.interfaces.IVocabularyFactory"
+             name="nti.contenttypes.completion.certificate_vocabulary" />
 
 </configure>
