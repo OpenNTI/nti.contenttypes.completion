@@ -67,7 +67,7 @@ def is_item_required(item, context):
     return result
 
 
-def update_completion(obj, ntiid, user, context, force=False):
+def update_completion(obj, ntiid, user, context, overwrite=False):
     """
     For the given object and user, update the completed state for the
     completion context based on the adapted :class:`IProgress`, if
@@ -77,7 +77,7 @@ def update_completion(obj, ntiid, user, context, force=False):
     :param ntiid: the ntiid of the completable item
     :param user: the user who has updated progress on the item
     :param context: the :class:`ICompletionContext`
-    :param force: Whether to force recalculation of completion status
+    :param overwrite: Whether to overwrite existing completion status
     """
     principal_container = component.queryMultiAdapter((user, context),
                                                       IPrincipalCompletedItemContainer)
@@ -90,7 +90,7 @@ def update_completion(obj, ntiid, user, context, force=False):
     # if they have not completed the item successfully.
     if ntiid not in principal_container \
             or not principal_container[ntiid].Success \
-            or force:
+            or overwrite:
         policy = component.getMultiAdapter((obj, context),
                                            ICompletableItemCompletionPolicy)
         progress = component.queryMultiAdapter((user, obj, context),

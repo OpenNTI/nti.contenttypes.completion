@@ -26,7 +26,7 @@ logger = __import__('logging').getLogger(__name__)
 def _progress_removed(item, event):
     if event.user is not None:
         update_completion(item, item.ntiid, event.user, event.context,
-                          force=True)
+                          overwrite=True)
 
 
 def completion_context_default_policy(completion_context, unused_event=None):

@@ -89,7 +89,7 @@ class TestUpdateCompletion(TestCase):
 
     @fudge.patch('nti.contenttypes.completion.utils.logger')
     @WithMockDSTrans
-    def test_forced_successful_to_no_progress(self, logger):
+    def test_overwrite_successful_to_no_progress(self, logger):
         messages = dict(info=[], debug=[], warning=[])
         self._setup_logger(logger, messages)
 
@@ -99,7 +99,7 @@ class TestUpdateCompletion(TestCase):
 
         container = self._test_update_completion(obj, prin, completed_item,
                                                  progress=None,
-                                                 force=True)
+                                                 overwrite=True)
 
         # Completed item removed
         assert_that(container, has_length(0))
@@ -114,7 +114,7 @@ class TestUpdateCompletion(TestCase):
 
     @fudge.patch('nti.contenttypes.completion.utils.logger')
     @WithMockDSTrans
-    def test_forced_successful_to_successful(self, logger):
+    def test_overwrite_successful_to_successful(self, logger):
         messages = dict(info=[], debug=[], warning=[])
         self._setup_logger(logger, messages)
 
@@ -126,7 +126,7 @@ class TestUpdateCompletion(TestCase):
         container = self._test_update_completion(obj, prin, completed_item,
                                                  progress=object(),
                                                  new_completed_item=new_completed_item,
-                                                 force=True)
+                                                 overwrite=True)
 
         # Completed item replaced
         assert_that(container, has_length(1))
@@ -253,7 +253,7 @@ class TestUpdateCompletion(TestCase):
 
     @fudge.patch('nti.contenttypes.completion.utils.logger')
     @WithMockDSTrans
-    def test_forced_successful_to_incomplete(self, logger):
+    def test_overwrite_successful_to_incomplete(self, logger):
         messages = dict(info=[], debug=[], warning=[])
         self._setup_logger(logger, messages)
 
@@ -264,7 +264,7 @@ class TestUpdateCompletion(TestCase):
         container = self._test_update_completion(obj, prin, completed_item,
                                                  progress=object(),
                                                  new_completed_item=None,
-                                                 force=True)
+                                                 overwrite=True)
 
         # Completed item removed
         assert_that(container, has_length(0))
@@ -286,7 +286,7 @@ class TestUpdateCompletion(TestCase):
                                 is_required=True,
                                 progress=None,
                                 new_completed_item=None,
-                                force=False):
+                                overwrite=False):
         # Set up context
         dataserver = component.getUtility(IDataserver)
         ds_folder = dataserver.dataserver_folder
@@ -317,7 +317,7 @@ class TestUpdateCompletion(TestCase):
             with _registered_adapter(item_completion_policy,
                                      provided=ICompletableItemCompletionPolicy):
                 update_completion(obj, obj.ntiid, principal_user, context,
-                                  force=force)
+                                  overwrite=overwrite)
 
         return principal_container
 
