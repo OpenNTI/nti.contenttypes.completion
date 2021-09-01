@@ -67,7 +67,7 @@ def is_item_required(item, context):
     return result
 
 
-def update_completion(obj, ntiid, user, context):
+def update_completion(obj, ntiid, user, context, overwrite=False):
     """
     For the given object and user, update the completed state for the
     completion context based on the adapted :class:`IProgress`, if
@@ -77,6 +77,7 @@ def update_completion(obj, ntiid, user, context):
     :param ntiid: the ntiid of the completable item
     :param user: the user who has updated progress on the item
     :param context: the :class:`ICompletionContext`
+    :param overwrite: Whether to overwrite existing completion status
     """
     principal_container = component.queryMultiAdapter((user, context),
                                                       IPrincipalCompletedItemContainer)
@@ -87,17 +88,24 @@ def update_completion(obj, ntiid, user, context):
         return
     # Update completion if the user has no completion or
     # if they have not completed the item successfully.
-    if     ntiid not in principal_container \
-        or not principal_container[ntiid].Success:
+    if ntiid not in principal_container \
+            or not principal_container[ntiid].Success \
+            or overwrite:
         policy = component.getMultiAdapter((obj, context),
                                            ICompletableItemCompletionPolicy)
         progress = component.queryMultiAdapter((user, obj, context),
                                                IProgress)
+        # Pop the old value
+        prev_success = removed = False
+        if ntiid in principal_container:
+            prev_success = principal_container[ntiid].Success
+            removed = principal_container.remove_item(obj)
+
+        success = False
+        completed_item = None
         if progress is not None:
             completed_item = policy.is_complete(progress)
             if completed_item is not None:
-                # Pop the old value
-                principal_container.remove_item(obj)
                 # The completed item we get may be different from the given
                 # obj.
                 logger.info('Marking item complete (ntiid=%s) (user=%s) (item=%s)',
@@ -105,16 +113,22 @@ def update_completion(obj, ntiid, user, context):
                 assert ICompletedItem.providedBy(completed_item), \
                        "Must have completed item"
                 principal_container[ntiid] = completed_item
-                # We broadcast for the context if we have a successfully completed
-                # item where we did not before.
-                if      completed_item.Success \
-                    and is_item_required(obj, context):
-                    notify(UserProgressUpdatedEvent(obj=context,
-                                                    user=user,
-                                                    context=context))
+                success = completed_item.Success
             else:
                 logger.debug('Item is not complete (ntiid=%s) (user=%s) (item=%s) (progress=%s)',
                              ntiid, user.username, completed_item, progress)
+
+        if removed and completed_item is None:
+            logger.info('Removed progress for user (%s) (item=%s)',
+                        user, ntiid)
+
+        if is_item_required(obj, context) and prev_success != success:
+            # We broadcast for the context if we have a successfully completed
+            # item where we did not before, or if it was previously successful
+            # and no longer is
+            notify(UserProgressUpdatedEvent(obj=context,
+                                            user=user,
+                                            context=context))
 
 
 def remove_completion(obj, ntiid, user, context):
