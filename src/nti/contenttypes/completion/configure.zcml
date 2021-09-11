@@ -99,6 +99,7 @@
 
     <!-- Subscribers -->
     <subscriber handler=".subscribers._progress_removed" />
+    <subscriber handler=".subscribers._on_completed_item_created" />
 
     <!-- Default 100% policy factory -->
     <utility factory=".policies.CompletionContextCompletionPolicyFactory"
@@ -121,4 +122,8 @@
              provides="zope.schema.interfaces.IVocabularyFactory"
              name="nti.contenttypes.completion.certificate_vocabulary" />
 
+    <!-- Weak refs -->
+    <adapter factory="nti.intid.wref.NoCachingArbitraryOrderableWeakRef"
+             provides="nti.wref.interfaces.IWeakRef"
+             for="nti.contenttypes.completion.interfaces.ICompletedItem" />
 </configure>

@@ -88,7 +88,7 @@ def update_completion(obj, ntiid, user, context, overwrite=False):
         return
     # Update completion if the user has no completion or
     # if they have not completed the item successfully.
-    if ntiid not in principal_container \
+    if          ntiid not in principal_container \
             or not principal_container[ntiid].Success \
             or overwrite:
         policy = component.getMultiAdapter((obj, context),

@@ -30,6 +30,10 @@ from nti.base.interfaces import ILastModified
 
 from nti.contenttypes.completion import CERTIFICATE_RENDERER_VOCAB_NAME
 
+from nti.dataserver.activitystream_change import Change
+
+from nti.dataserver.interfaces import IStreamChangeEvent
+
 from nti.ntiids.schema import ValidNTIID
 
 from nti.property.property import alias
@@ -630,3 +634,18 @@ def get_completables():
     for _, predicate in list(predicates):
         for obj in predicate.iter_objects():
             yield obj
+
+
+class ICompletedItemCreatedStreamChangeEvent(IStreamChangeEvent):
+    pass
+
+
+@interface.implementer(ICompletedItemCreatedStreamChangeEvent)
+class CompletedItemCreatedChangeEvent(Change):
+
+    externalObjectDecoration = True
+
+    def __init__(self, obj, user):
+        super(CompletedItemCreatedChangeEvent, self).__init__(Change.CREATED, obj)
+        self.creator = user
+        self.sharedWith = (user,)
