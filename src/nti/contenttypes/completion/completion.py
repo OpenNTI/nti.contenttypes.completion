@@ -19,6 +19,8 @@ from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContai
 
 from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeContainer
 
+from nti.dataserver.sharing import AbstractReadableSharedMixin
+
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
 from nti.externalization.representation import WithRepr
@@ -86,7 +88,9 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
 
 @WithRepr
 @interface.implementer(ICompletedItem)
-class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained):
+class CompletedItem(PersistentCreatedAndModifiedTimeObject, 
+                    Contained,
+                    AbstractReadableSharedMixin):
 
     __external_can_create__ = False
 
@@ -110,6 +114,10 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject, Contained):
         self._item = IWeakRef(Item)
         self._item_ntiid = Item.ntiid
         self.Principal = IPrincipal(Principal)
+
+    @property
+    def sharedWith(self):
+        return (self.Principal.id,)
 
     @property
     def Item(self):

@@ -9,15 +9,29 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 from zope import component
+from zope import interface
 
+from zope.event import notify
+
+from zope.intid.interfaces import IIntIdAddedEvent
+
+from zope.lifecycleevent.interfaces import IObjectAddedEvent
+
+from nti.contenttypes.completion.interfaces import ICompletedItem
 from nti.contenttypes.completion.interfaces import ICompletableItem
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
 from nti.contenttypes.completion.interfaces import IUserProgressRemovedEvent
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
+from nti.contenttypes.completion.interfaces import CompletedItemCreatedChangeEvent
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyFactory
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicyContainer
 
 from nti.contenttypes.completion.utils import update_completion
+
+from nti.coremetadata.interfaces import IUser
+
+from nti.dataserver.interfaces import TargetedStreamChangeEvent
+    
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -55,3 +69,12 @@ def completion_context_deleted_event(completion_context, unused_event=None):
         if container:
             # pylint: disable=too-many-function-args
             container.clear()
+
+
+@component.adapter(ICompletedItem, IIntIdAddedEvent)
+def _on_completed_item_created(completed_item, unused_event=None):
+    """
+    """
+    user = IUser(completed_item.Principal)
+    change = CompletedItemCreatedChangeEvent(completed_item, user)
+    notify(TargetedStreamChangeEvent(change, user))
