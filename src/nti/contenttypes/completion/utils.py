@@ -96,10 +96,10 @@ def update_completion(obj, ntiid, user, context, overwrite=False):
         progress = component.queryMultiAdapter((user, obj, context),
                                                IProgress)
         # Pop the old value
-        prev_success = removed = False
+        prev_success = was_complete = False
         if ntiid in principal_container:
             prev_success = principal_container[ntiid].Success
-            removed = principal_container.remove_item(obj)
+            was_complete = principal_container.remove_item(obj)
 
         success = False
         completed_item = None
@@ -118,11 +118,13 @@ def update_completion(obj, ntiid, user, context, overwrite=False):
                 logger.debug('Item is not complete (ntiid=%s) (user=%s) (item=%s) (progress=%s)',
                              ntiid, user.username, completed_item, progress)
 
-        if removed and completed_item is None:
+        is_complete = completed_item is not None
+        if was_complete and not is_complete:
             logger.info('Removed progress for user (%s) (item=%s)',
                         user, ntiid)
 
-        if is_item_required(obj, context) and prev_success != success:
+        if is_item_required(obj, context) \
+                and (prev_success != success or was_complete != is_complete):
             # We broadcast for the context if we have a successfully completed
             # item where we did not before, or if it was previously successful
             # and no longer is
