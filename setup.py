@@ -55,6 +55,7 @@ setup(
     install_requires=[
         'BTrees',
         'nti.containers',
+        'nti.dataserver',
         'nti.dublincore',
         'nti.externalization',
 	'nti.mimetype',
