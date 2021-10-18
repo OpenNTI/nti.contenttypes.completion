@@ -74,7 +74,7 @@ class TestUpdateCompletion(TestCase):
         self._verify_events()
 
     @WithMockDSTrans
-    def test_successful(self):
+    def test_already_successful(self):
         obj = MockCompletableItem("test_ntiid")
         prin = IPrincipal(User.create_user(username='completion_tester'))
         completed_item = self._fake_completed_item(obj.ntiid, prin)
@@ -141,7 +141,7 @@ class TestUpdateCompletion(TestCase):
 
     @fudge.patch('nti.contenttypes.completion.utils.logger')
     @WithMockDSTrans
-    def test_empty_completed_to_no_progress(self, _logger):
+    def test_no_progress_to_no_progress(self, _logger):
         obj = MockCompletableItem("test_ntiid")
         prin = IPrincipal(User.create_user(username='completion_tester'))
 
@@ -155,7 +155,7 @@ class TestUpdateCompletion(TestCase):
 
     @fudge.patch('nti.contenttypes.completion.utils.logger')
     @WithMockDSTrans
-    def test_empty_completed_to_successful(self, logger):
+    def test_no_progress_to_successful(self, logger):
         messages = dict(info=[], debug=[], warning=[])
         self._setup_logger(logger, messages)
 
@@ -180,7 +180,32 @@ class TestUpdateCompletion(TestCase):
 
     @fudge.patch('nti.contenttypes.completion.utils.logger')
     @WithMockDSTrans
-    def test_empty_completed_to_successful_not_required(self, logger):
+    def test_no_progress_to_unsuccessfully_complete(self, logger):
+        messages = dict(info=[], debug=[], warning=[])
+        self._setup_logger(logger, messages)
+
+        obj = MockCompletableItem("test_ntiid")
+        prin = IPrincipal(User.create_user(username='completion_tester'))
+        completed_item = None
+        new_completed_item = self._fake_completed_item(obj.ntiid, prin, success=False)
+
+        container = self._test_update_completion(obj, prin, completed_item,
+                                                 progress=object(),
+                                                 new_completed_item=new_completed_item)
+
+        # Completed item added
+        assert_that(container, has_length(1))
+
+        # Logged addition
+        self._verify_logging_counts(messages, info=1)
+        assert_that(messages['info'][0][0], starts_with('Marking item complete'))
+
+        self._verify_events(completed_item,
+                            added=True, progress_updated=True)
+
+    @fudge.patch('nti.contenttypes.completion.utils.logger')
+    @WithMockDSTrans
+    def test_no_progress_to_successful_not_required(self, logger):
         messages = dict(info=[], debug=[], warning=[])
         self._setup_logger(logger, messages)
 
@@ -206,7 +231,33 @@ class TestUpdateCompletion(TestCase):
 
     @fudge.patch('nti.contenttypes.completion.utils.logger')
     @WithMockDSTrans
-    def test_not_successful_to_no_progress(self, logger):
+    def test_no_progress_to_unsuccessfully_complete_not_required(self, logger):
+        messages = dict(info=[], debug=[], warning=[])
+        self._setup_logger(logger, messages)
+
+        obj = MockCompletableItem("test_ntiid")
+        prin = IPrincipal(User.create_user(username='completion_tester'))
+        completed_item = None
+        new_completed_item = self._fake_completed_item(obj.ntiid, prin, success=False)
+
+        container = self._test_update_completion(obj, prin, completed_item,
+                                                 progress=object(),
+                                                 new_completed_item=new_completed_item,
+                                                 is_required=False)
+
+        # Completed item added
+        assert_that(container, has_length(1))
+
+        # Logged addition
+        self._verify_logging_counts(messages, info=1)
+        assert_that(messages['info'][0][0], starts_with('Marking item complete'))
+
+        self._verify_events(completed_item,
+                            added=True, progress_updated=False)
+
+    @fudge.patch('nti.contenttypes.completion.utils.logger')
+    @WithMockDSTrans
+    def test_unsuccessfully_complete_to_no_progress(self, logger):
         messages = dict(info=[], debug=[], warning=[])
         self._setup_logger(logger, messages)
 
@@ -223,11 +274,11 @@ class TestUpdateCompletion(TestCase):
         self._verify_logging_counts(messages, info=1)
         assert_that(messages['info'][0][0], starts_with('Removed progress'))
 
-        self._verify_events(completed_item, removed=True)
+        self._verify_events(completed_item, removed=True, progress_updated=True)
 
     @fudge.patch('nti.contenttypes.completion.utils.logger')
     @WithMockDSTrans
-    def test_not_successful_to_successful(self, logger):
+    def test_unsuccessfully_complete_to_successful(self, logger):
         messages = dict(info=[], debug=[], warning=[])
         self._setup_logger(logger, messages)
 
