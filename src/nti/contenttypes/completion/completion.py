@@ -14,8 +14,12 @@ from zope import interface
 
 from zope.security.interfaces import IPrincipal
 
+from pyramid import httpexceptions as hexc
+
 from nti.contenttypes.completion.interfaces import ICompletedItem
+from nti.contenttypes.completion.interfaces import IAwardedCompletedItem
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import IPrincipalAwardedCompletedItemContainer
 
 from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeContainer
 
@@ -32,6 +36,7 @@ from nti.schema.fieldproperty import createDirectFieldProperties
 from nti.schema.schema import SchemaConfigured
 
 from nti.wref.interfaces import IWeakRef
+from nti.dataserver.authorization import is_admin_or_content_admin_or_site_admin
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -76,6 +81,55 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
     def remove_item(self, item):
         """
         Remove all :class:`ICompletedItem` referenced by the given
+        :class:`ICompletableItem` from this container.
+        """
+        try:
+            del self[item.ntiid]
+            result = True
+        except KeyError:
+            result = False
+        return result
+    
+@interface.implementer(IPrincipalAwardedCompletedItemContainer)
+class PrincipalAwardedCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
+                                             SchemaConfigured):
+    createDirectFieldProperties(IPrincipalAwardedCompletedItemContainer)
+
+    user = alias('Principal')
+    __parent__ = None
+    __name__ = None
+
+    def __init__(self, principal):
+        super(PrincipalAwardedCompletedItemContainer, self).__init__()
+        self.Principal = IPrincipal(principal)
+
+    def add_awarded_completed_item(self, awarded_completed_item):
+        """
+        Add a :class:`IAwardedCompletedItem` to the container.
+        """
+        assert awarded_completed_item.Principal == self.user
+        self[awarded_completed_item.item_ntiid] = awarded_completed_item
+
+    def get_awarded_completed_item(self, item):
+        """
+        Return the :class:`IAwardedCompletedItem` from this container given a
+        :class:`ICompletableItem`, returning None if it does not exist.
+        """
+        try:
+            key = item.ntiid
+        except AttributeError:
+            key = ''
+        return self.get(key)
+
+    def get_awarded_completed_item_count(self):
+        """
+        Return the number of completed items by this principal.
+        """
+        return len(self)
+
+    def remove_item(self, item):
+        """
+        Remove all :class:`IAwardedCompletedItem` referenced by the given
         :class:`ICompletableItem` from this container.
         """
         try:
@@ -129,3 +183,15 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject,
     @property
     def ItemNTIID(self):
         return self._item_ntiid or self.__name__
+    
+@WithRepr
+@interface.implementer(IAwardedCompletedItem)
+class AwardedCompletedItem(CompletedItem):
+
+    mimeType = mime_type = "application/vnd.nextthought.completion.awardedcompleteditem"
+
+    def __init__(self, Principal=None, Item=None, Success=True, CompletedDate=None, awarder=None, reason=None, *args, **kwargs):
+        # See note in Progress about why this is not schema configured.
+        super(AwardedCompletedItem, self).__init__(Principal=Principal, Item=Item, Success=Success, CompletedDate=CompletedDate, *args, **kwargs)
+        self.awarder = awarder
+        self.reason = reason

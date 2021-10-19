@@ -19,6 +19,10 @@
     <adapter factory=".adapters.CompletedItemContainerFactory"
              provides=".interfaces.ICompletedItemContainer"
              for=".interfaces.ICompletionContext" />
+             
+	<adapter factory=".adapters.AwardedCompletedItemContainerFactory"
+             provides=".interfaces.IAwardedCompletedItemContainer"
+             for=".interfaces.ICompletionContext" />
 
     <adapter factory=".adapters.CompletableItemContainerFactory"
              provides=".interfaces.ICompletableItemContainer"
@@ -40,6 +44,11 @@
              provides=".interfaces.IPrincipalCompletedItemContainer"
              for="zope.security.interfaces.IPrincipal
                   .interfaces.ICompletionContext" />
+                  
+	<adapter factory=".adapters._context_to_principal_awarded_container"
+             provides=".interfaces.IPrincipalAwardedCompletedItemContainer"
+             for="zope.security.interfaces.IPrincipal
+                  .interfaces.ICompletionContext" />
 
     <!-- ACL/ACE permissions -->
     <permission
@@ -57,6 +66,7 @@
     <ext:registerAutoPackageIO
         root_interfaces=".interfaces.IProgress
                          .interfaces.ICompletedItem
+                         .interfaces.IAwardedCompletedItem
                          .interfaces.ICompletableItemContainer
                          .interfaces.ICompletionContextProgress
                          .interfaces.ICompletableItemDefaultRequiredPolicy
@@ -96,6 +106,10 @@
     <adapter factory="nti.dublincore.annotatableadapter.none_dublincore_adapter"
              provides="zope.dublincore.interfaces.IWriteZopeDublinCore"
              for="nti.contenttypes.completion.interfaces.ICompletedItemContainer" />
+
+    <adapter factory="nti.dublincore.annotatableadapter.none_dublincore_adapter"
+             provides="zope.dublincore.interfaces.IWriteZopeDublinCore"
+             for="nti.contenttypes.completion.interfaces.IAwardedCompletedItemContainer" />
 
     <!-- Subscribers -->
     <subscriber handler=".subscribers._progress_removed" />

@@ -33,6 +33,7 @@ from nti.contenttypes.completion import CERTIFICATE_RENDERER_VOCAB_NAME
 from nti.dataserver.activitystream_change import Change
 
 from nti.dataserver.interfaces import IStreamChangeEvent
+from nti.dataserver.interfaces import IUser
 
 from nti.ntiids.schema import ValidNTIID
 
@@ -45,6 +46,7 @@ from nti.schema.field import Number
 from nti.schema.field import Choice
 from nti.schema.field import TextLine
 from nti.schema.field import ValidDatetime
+from nti.schema.field import ValidText
 from nti.schema.field import ValidTextLine
 from nti.schema.field import UniqueIterable
 
@@ -85,7 +87,20 @@ class ICompletedItem(IContained):
                    default=True)
 
     ItemNTIID = ValidNTIID(title=u"Completed Item NTIID", required=False, default=None)
-
+    
+class IAwardedCompletedItem(ICompletedItem):
+    """
+    A :class: `ICompletedItem` that can be manually awarded by a course admin
+    Contains information on who awarded it and, optionally, a reason it was awarded
+    """
+    
+    awarder = Object(IUser,
+                   title=u'Awarder User',
+                   description=u'The User object that awarded this item',
+                   required=True)
+    
+    reason = ValidText(title=u'Explanation for awarding the item',
+                               required=False)
 
 class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     """
@@ -396,6 +411,42 @@ class IPrincipalCompletedItemContainer(IContainer, IContained, INoAutoIndexEver)
         Remove all :class:`ICompletedItem` referenced by the given
         :class:`ICompletableItem` from this container.
         """
+        
+        
+class IPrincipalAwardedCompletedItemContainer(IContainer, IContained, INoAutoIndexEver):
+    """
+    Contains :class:`IAwardedCompletedItem` that have been awarded to a user by a course admin
+    """
+
+    contains(IAwardedCompletedItem)
+    containers('.IAwardedCompletedItemContainer')
+
+    Principal = Object(IPrincipal,
+                       title=u'The principal',
+                       description=u"The user principal has completed these items.",
+                       required=True)
+
+    def add_awarded_completed_item(completed_item):
+        """
+        Add a :class:`ICompletedItem` to the container.
+        """
+
+    def get_awarded_completed_item(item):
+        """
+        Return the :class:`ICompletedItem` from this container given a
+        :class:`ICompletableItem`, returning None if it does not exist.
+        """
+
+    def get_awarded_completed_item_count():
+        """
+        Return the number of completed items by this principal.
+        """
+
+    def remove_item(item):
+        """
+        Remove all :class:`ICompletedItem` referenced by the given
+        :class:`ICompletableItem` from this container.
+        """
 
 
 class ICompletedItemContainer(IContainer):
@@ -428,6 +479,39 @@ class ICompletedItemContainer(IContainer):
     def remove_item(item):
         """
         Remove all :class:`ICompletedItem` objects referenced by the given
+        :class:`ICompletableItem`, returning the count of removed items.
+        """
+        
+class IAwardedCompletedItemContainer(IContainer):
+    """
+    Contains items that have been manually marked as completed
+    by a course admin for the :class:`ICompletionContext`, organized with
+    :class:`IPrincipalAwardedCompletedItemContainer` objects.
+    """
+
+    contains(IPrincipalAwardedCompletedItemContainer)
+
+    def get_awarded_completed_items(item):
+        """
+        Return all :class:`IAwardedCompletedItem` objects for the given
+        :class:`ICompletableItem`.
+        """
+
+    def get_awarded_completed_item_count(item):
+        """
+        Return the number of :class:`IAwardedCompletedItem` objects for the given
+        :class:`ICompletableItem`.
+        """
+        
+    def remove_principal(principal):
+        """
+        Remove all :class:`IAwardedCompletedItem` objects for the given
+        principal.
+        """
+
+    def remove_item(item):
+        """
+        Remove all :class:`IAwardedCompletedItem` objects referenced by the given
         :class:`ICompletableItem`, returning the count of removed items.
         """
 

@@ -27,16 +27,20 @@ from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeContainer
 
 from nti.contenttypes.completion.completion import PrincipalCompletedItemContainer
+from nti.contenttypes.completion.completion import PrincipalAwardedCompletedItemContainer
 
 from nti.contenttypes.completion.interfaces import ICompletedItem
+from nti.contenttypes.completion.interfaces import IAwardedCompletedItem
 from nti.contenttypes.completion.interfaces import ISuccessAdapter
 from nti.contenttypes.completion.interfaces import IItemNTIIDAdapter
 from nti.contenttypes.completion.interfaces import IPrincipalAdapter
 from nti.contenttypes.completion.interfaces import ICompletionContext
 from nti.contenttypes.completion.interfaces import ICompletionTimeAdapter
 from nti.contenttypes.completion.interfaces import ICompletedItemContainer
+from nti.contenttypes.completion.interfaces import IAwardedCompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import IPrincipalAwardedCompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletionContextCompletionPolicy
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 from nti.contenttypes.completion.interfaces import CompletionContextCompletionPolicyUpdated
@@ -49,6 +53,7 @@ from nti.schema.schema import SchemaConfigured
 from nti.wref.interfaces import IWeakRef
 
 COMPLETED_ITEM_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletedItemContainer'
+AWARDED_COMPLETED_ITEM_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.IAwardedCompletedItemContainer'
 COMPLETABLE_ITEM_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletableItemContainer'
 COMPLETABLE_ITEM_DEFAULT_REQUIRED_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletableItemDefaultRequiredPolicy'
 COMPLETION_CONTAINER_ANNOTATION_KEY = 'nti.contenttypes.completion.interfaces.ICompletionContextCompletionPolicyContainer'
@@ -116,6 +121,67 @@ class CompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
 
 _CompletedItemContainerFactory = an_factory(CompletedItemContainer,
                                             COMPLETED_ITEM_ANNOTATION_KEY)
+
+@component.adapter(ICompletionContext)
+@interface.implementer(IAwardedCompletedItemContainer)
+class AwardedCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
+                                    SchemaConfigured):
+    """
+    Stores mappings of username -> IPrincipalCompletedItemContainer for a user.
+    """
+    createDirectFieldProperties(IAwardedCompletedItemContainer)
+
+    def get_awarded_completed_items(self, item):
+        """
+        Return all :class:`IAwardedCompletedItem` objects for the given
+        :class:`ICompletableItem`.
+        """
+        result = []
+        for user_container in self.values():
+            awarded_completed_item = user_container.get_awarded_completed_item(item)
+            if awarded_completed_item is not None:
+                result.append(awarded_completed_item)
+        return result
+
+    def get_awarded_completed_item_count(self, item):
+        """
+        Return the number of :class:`IAwardedCompletedItem` objects for the given
+        :class:`ICompletableItem`.
+        """
+        return len(self.get_awarded_completed_items(item))
+
+    def remove_item(self, item):
+        """
+        Remove all :class:`IAwardedCompletedItem` objects referenced by the given
+        :class:`ICompletableItem`.
+        """
+        count = 0
+        for user_container in self.values():
+            did_remove = user_container.remove_item(item)
+            if did_remove:
+                count += 1
+        return count
+    
+    def remove_principal(self, user):
+        """
+        Remove all :class:`IAwardedCompletedItem` objects for the specified user
+        """
+        key = getattr(user, 'username', None) or getattr(user, 'id', user)
+        container = self.get(key, None)
+        if container is not None:
+            container.clear()
+            del self[key]
+            return True
+        return False
+    remove_user = remove_principal
+
+    def clear(self):
+        for username in list(self.keys()):
+            self.remove_principal(username)
+        super(CompletedItemContainer, self).clear()
+
+_AwardedCompletedItemContainerFactory = an_factory(AwardedCompletedItemContainer,
+                                                   AWARDED_COMPLETED_ITEM_ANNOTATION_KEY)
 
 
 @component.adapter(ICompletionContext)
@@ -284,6 +350,9 @@ def _create_annotation(obj, factory):
 def CompletedItemContainerFactory(obj):
     return _create_annotation(obj, _CompletedItemContainerFactory)
 
+def AwardedCompletedItemContainerFactory(obj):
+    return _create_annotation(obj, _AwardedCompletedItemContainerFactory)
+
 
 def CompletableItemContainerFactory(obj):
     return _create_annotation(obj, _CompletableItemContainerFactory)
@@ -307,6 +376,19 @@ def _context_to_principal_container(user, completion_context):
         result = completed_container[user_id]
     except KeyError:
         result = PrincipalCompletedItemContainer(principal)
+        completed_container[user_id] = result
+    return result
+
+@component.adapter(IPrincipal, ICompletionContext)
+@interface.implementer(IPrincipalAwardedCompletedItemContainer)
+def _context_to_principal_awarded_container(user, completion_context):
+    completed_container = IAwardedCompletedItemContainer(completion_context)
+    principal = IPrincipal(user)
+    user_id = principal.id
+    try:
+        result = completed_container[user_id]
+    except KeyError:
+        result = PrincipalAwardedCompletedItemContainer(principal)
         completed_container[user_id] = result
     return result
 
