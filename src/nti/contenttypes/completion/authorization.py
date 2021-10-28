@@ -16,3 +16,4 @@ logger = __import__('logging').getLogger(__name__)
 
 ACT_VIEW_PROGRESS = Permission('nti.actions.completion.viewprogress')
 ACT_LIST_PROGRESS = Permission('nti.actions.completion.listprogress')
+ACT_AWARD_PROGRESS = Permission('nti.actions.completion.awardprogress')

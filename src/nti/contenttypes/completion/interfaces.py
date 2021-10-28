@@ -94,9 +94,9 @@ class IAwardedCompletedItem(ICompletedItem):
     Contains information on who awarded it and, optionally, a reason it was awarded
     """
     
-    awarder = Object(IUser,
-                   title=u'Awarder User',
-                   description=u'The User object that awarded this item',
+    awarder = Object(IPrincipal,
+                   title=u'Awarder Principal',
+                   description=u'The principal who awarded this item',
                    required=True)
     
     reason = ValidText(title=u'Explanation for awarding the item',
@@ -413,41 +413,13 @@ class IPrincipalCompletedItemContainer(IContainer, IContained, INoAutoIndexEver)
         """
         
         
-class IPrincipalAwardedCompletedItemContainer(IContainer, IContained, INoAutoIndexEver):
+class IPrincipalAwardedCompletedItemContainer(IPrincipalCompletedItemContainer):
     """
     Contains :class:`IAwardedCompletedItem` that have been awarded to a user by a course admin
     """
 
     contains(IAwardedCompletedItem)
     containers('.IAwardedCompletedItemContainer')
-
-    Principal = Object(IPrincipal,
-                       title=u'The principal',
-                       description=u"The user principal has completed these items.",
-                       required=True)
-
-    def add_awarded_completed_item(completed_item):
-        """
-        Add a :class:`ICompletedItem` to the container.
-        """
-
-    def get_awarded_completed_item(item):
-        """
-        Return the :class:`ICompletedItem` from this container given a
-        :class:`ICompletableItem`, returning None if it does not exist.
-        """
-
-    def get_awarded_completed_item_count():
-        """
-        Return the number of completed items by this principal.
-        """
-
-    def remove_item(item):
-        """
-        Remove all :class:`ICompletedItem` referenced by the given
-        :class:`ICompletableItem` from this container.
-        """
-
 
 class ICompletedItemContainer(IContainer):
     """
@@ -482,38 +454,14 @@ class ICompletedItemContainer(IContainer):
         :class:`ICompletableItem`, returning the count of removed items.
         """
         
-class IAwardedCompletedItemContainer(IContainer):
+class IAwardedCompletedItemContainer(ICompletedItemContainer):
     """
     Contains items that have been manually marked as completed
     by a course admin for the :class:`ICompletionContext`, organized with
     :class:`IPrincipalAwardedCompletedItemContainer` objects.
     """
-
     contains(IPrincipalAwardedCompletedItemContainer)
-
-    def get_awarded_completed_items(item):
-        """
-        Return all :class:`IAwardedCompletedItem` objects for the given
-        :class:`ICompletableItem`.
-        """
-
-    def get_awarded_completed_item_count(item):
-        """
-        Return the number of :class:`IAwardedCompletedItem` objects for the given
-        :class:`ICompletableItem`.
-        """
-        
-    def remove_principal(principal):
-        """
-        Remove all :class:`IAwardedCompletedItem` objects for the given
-        principal.
-        """
-
-    def remove_item(item):
-        """
-        Remove all :class:`IAwardedCompletedItem` objects referenced by the given
-        :class:`ICompletableItem`, returning the count of removed items.
-        """
+    
 
 class IProgress(interface.Interface):
     """

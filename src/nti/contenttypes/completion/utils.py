@@ -37,6 +37,7 @@ from nti.contenttypes.completion.interfaces import ICompletableItemContainer
 from nti.contenttypes.completion.interfaces import IRequiredCompletableItemProvider
 from nti.contenttypes.completion.interfaces import ICompletableItemCompletionPolicy
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import IPrincipalAwardedCompletedItemContainer
 from nti.contenttypes.completion.interfaces import ICompletableItemDefaultRequiredPolicy
 
 from nti.site.site import get_component_hierarchy_names
@@ -168,6 +169,18 @@ def get_completed_item(user, context, item):
     """
     user_container = component.getMultiAdapter((user, context),
                                                IPrincipalCompletedItemContainer)
+    return user_container.get_completed_item(item)
+
+
+def get_awarded_completed_item(user, context, item):
+    """
+    Return the :class:`IAwardedCompletedItem` for the given context, user and item.
+    :param user: the user who has updated progress on the item
+    :param context: the :class:`ICompletionContext`
+    :param obj: the :class:`ICompletableItem`
+    """
+    user_container = component.getMultiAdapter((user, context),
+                                               IPrincipalAwardedCompletedItemContainer)
     return user_container.get_completed_item(item)
 
 

@@ -124,61 +124,11 @@ _CompletedItemContainerFactory = an_factory(CompletedItemContainer,
 
 @component.adapter(ICompletionContext)
 @interface.implementer(IAwardedCompletedItemContainer)
-class AwardedCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeContainer,
-                                    SchemaConfigured):
+class AwardedCompletedItemContainer(CompletedItemContainer):
     """
-    Stores mappings of username -> IPrincipalCompletedItemContainer for a user.
+    Stores mappings of username -> IPrincipalAwardedCompletedItemContainer for a user.
     """
     createDirectFieldProperties(IAwardedCompletedItemContainer)
-
-    def get_awarded_completed_items(self, item):
-        """
-        Return all :class:`IAwardedCompletedItem` objects for the given
-        :class:`ICompletableItem`.
-        """
-        result = []
-        for user_container in self.values():
-            awarded_completed_item = user_container.get_awarded_completed_item(item)
-            if awarded_completed_item is not None:
-                result.append(awarded_completed_item)
-        return result
-
-    def get_awarded_completed_item_count(self, item):
-        """
-        Return the number of :class:`IAwardedCompletedItem` objects for the given
-        :class:`ICompletableItem`.
-        """
-        return len(self.get_awarded_completed_items(item))
-
-    def remove_item(self, item):
-        """
-        Remove all :class:`IAwardedCompletedItem` objects referenced by the given
-        :class:`ICompletableItem`.
-        """
-        count = 0
-        for user_container in self.values():
-            did_remove = user_container.remove_item(item)
-            if did_remove:
-                count += 1
-        return count
-    
-    def remove_principal(self, user):
-        """
-        Remove all :class:`IAwardedCompletedItem` objects for the specified user
-        """
-        key = getattr(user, 'username', None) or getattr(user, 'id', user)
-        container = self.get(key, None)
-        if container is not None:
-            container.clear()
-            del self[key]
-            return True
-        return False
-    remove_user = remove_principal
-
-    def clear(self):
-        for username in list(self.keys()):
-            self.remove_principal(username)
-        super(CompletedItemContainer, self).clear()
 
 _AwardedCompletedItemContainerFactory = an_factory(AwardedCompletedItemContainer,
                                                    AWARDED_COMPLETED_ITEM_ANNOTATION_KEY)

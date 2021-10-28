@@ -58,6 +58,10 @@
     <permission
 	   id="nti.actions.completion.listprogress"
 	   title="List access to progress information" />
+	   
+	<permission
+	   id="nti.actions.completion.awardprogress"
+	   title="Permission to manually award completed items" />
 
     <!-- Externalization -->
     <include package="nti.externalization" file="meta.zcml" />

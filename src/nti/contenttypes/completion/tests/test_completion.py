@@ -15,8 +15,9 @@ from hamcrest import is_not
 from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
-from nti.contenttypes.completion.interfaces import IUserProgressUpdatedEvent,\
-    IPrincipalAwardedCompletedItemContainer
+
+from nti.contenttypes.completion.interfaces import IUserProgressUpdatedEvent
+from nti.contenttypes.completion.interfaces import IPrincipalAwardedCompletedItemContainer
 
 from nti.testing.matchers import validly_provides
 from nti.testing.matchers import verifiably_provides
@@ -285,6 +286,118 @@ class TestCompletion(unittest.TestCase):
         assert_that(user_container2.get_completed_item_count(), is_(0))
         assert_that(user_container2.get_completed_item(completable2), none())
         
+    def test_awarded_completed(self):
+        """
+        Test manually awarding completed items
+        """
+        now = datetime.utcnow()
+        user1 = MockUser(u'user1')
+        user2 = MockUser(u'user2')
+        site_admin = MockUser(u'site_admin')
+        completable1 = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable1')
+        completable2 = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable2')
+        completion_context = MockCompletionContext()
+        # pylint: disable=too-many-function-args
+        
+        awarded_completed_container = IAwardedCompletedItemContainer(completion_context)
+        
+        assert_that(awarded_completed_container, not_none())
+        assert_that(awarded_completed_container, has_length(0))
+        assert_that(awarded_completed_container.get_completed_item_count(completable1),
+                    is_(0))
+        assert_that(awarded_completed_container.remove_item(completable1), is_(0))
+        
+        user_awarded_container = component.queryMultiAdapter((user1, completion_context),
+                                                     IPrincipalAwardedCompletedItemContainer)
+        
+        assert_that(user_awarded_container, not_none())
+        assert_that(user_awarded_container.Principal, is_(user1))
+        assert_that(user_awarded_container.get_completed_item_count(), is_(0))
+        assert_that(user_awarded_container.get_completed_item(completable1), none())
+        assert_that(user_awarded_container.remove_item(completable1), is_(False))
+        
+        awarded_completed_item1 = AwardedCompletedItem(Principal=user1,
+                                                       Item=completable1,
+                                                       CompletedDate=now,
+                                                       awarder=site_admin,
+                                                       reason=u"Good Soup")
+        
+        user_awarded_container.add_completed_item(awarded_completed_item1)
+        assert_that(user_awarded_container.get_completed_item_count(), is_(1))
+        assert_that(user_awarded_container.get_completed_item(completable1),
+                    is_(awarded_completed_item1))
+        assert_that(awarded_completed_item1, validly_provides(IAwardedCompletedItem))
+        assert_that(awarded_completed_item1, verifiably_provides(IAwardedCompletedItem))
+        assert_that(awarded_completed_item1.Item, is_(completable1))
+        assert_that(awarded_completed_item1._item, not_none())
+        assert_that(awarded_completed_item1.item_ntiid, is_(completable1.ntiid))
+
+        # Idempotent
+        user_awarded_container.add_completed_item(awarded_completed_item1)
+        assert_that(user_awarded_container.get_completed_item_count(), is_(1))
+        assert_that(user_awarded_container.get_completed_item(completable1),
+                    is_(awarded_completed_item1))
+
+        # Second user
+        user_awarded_container2 = component.queryMultiAdapter((user2, completion_context),
+                                                      IPrincipalAwardedCompletedItemContainer)
+
+        with self.assertRaises(AssertionError):
+            # Add to incorrect container
+            user_awarded_container2.add_completed_item(awarded_completed_item1)
+
+        # Multiple
+        awarded_completed_item2 = AwardedCompletedItem(Principal=user1, 
+                                                       Item=completable2,
+                                                       CompletedDate=now,
+                                                       awarder=site_admin,
+                                                       reason="Vanguard Override")
+        user_awarded_container.add_completed_item(awarded_completed_item2)
+        assert_that(user_awarded_container.get_completed_item_count(), is_(2))
+
+        awarded_completed_item3 = AwardedCompletedItem(Principal=user2, 
+                                                       Item=completable2,
+                                                       CompletedDate=now,
+                                                       awarder=site_admin,
+                                                       reason="Cayde-6's Favorite")
+        
+        user_awarded_container2.add_completed_item(awarded_completed_item3)
+        assert_that(user_awarded_container2.get_completed_item_count(), is_(1))
+
+        # Validate counts
+        assert_that(awarded_completed_container.get_completed_item_count(completable1),
+                    is_(1))
+        assert_that(awarded_completed_container.get_completed_item_count(completable2),
+                    is_(2))
+
+        # Removal
+        remove_count = awarded_completed_container.remove_item(completable1)
+        assert_that(remove_count, is_(1))
+        assert_that(awarded_completed_container.get_completed_item_count(completable1),
+                    is_(0))
+        assert_that(awarded_completed_container.get_completed_item_count(completable2),
+                    is_(2))
+
+        assert_that(user_awarded_container.get_completed_item_count(), is_(1))
+        assert_that(user_awarded_container.get_completed_item(completable1), none())
+
+        assert_that(user_awarded_container2.get_completed_item_count(), is_(1))
+        assert_that(user_awarded_container2.get_completed_item(completable1), none())
+
+        # Removal of second item
+        remove_count = awarded_completed_container.remove_item(completable2)
+        assert_that(remove_count, is_(2))
+        assert_that(awarded_completed_container.get_completed_item_count(completable1),
+                    is_(0))
+        assert_that(awarded_completed_container.get_completed_item_count(completable2),
+                    is_(0))
+
+        assert_that(user_awarded_container.get_completed_item_count(), is_(0))
+        assert_that(user_awarded_container.get_completed_item(completable2), none())
+
+        assert_that(user_awarded_container2.get_completed_item_count(), is_(0))
+        assert_that(user_awarded_container2.get_completed_item(completable2), none())
+
     @fudge.patch('nti.contenttypes.completion.internalization.find_object_with_ntiid')
     def test_completable(self, mock_find_object):
         """
@@ -427,125 +540,6 @@ class TestCompletion(unittest.TestCase):
         assert_that(new_io.get_required_keys(), has_length(1))
         assert_that(new_io.get_optional_keys(), has_length(0))
 
-class TestAwarded(unittest.TestCase):
-    
-    layer = DSSharedConfiguringTestLayer
-    
-    @WithMockDSTrans
-    def test_awarded_completed(self):
-        """
-        Test manually awarding completed items
-        """
-        now = datetime.utcnow()
-        user1 = IPrincipal(User.create_user(username='awarded_tester1'))
-        user2 = IPrincipal(User.create_user(username='awarded_tester2'))
-        completable1 = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable1')
-        completable2 = MockCompletableItem(u'tag:nextthought.com,2011-10:NTI-TEST-completable2')
-        ds_folder = component.getUtility(IDataserver).dataserver_folder
-        completion_context = MockCompletionContext()
-        IConnection(ds_folder).add(completion_context)
-        # pylint: disable=too-many-function-args
-        
-        site_admin = User.create_user(username='Mara.Sov')
-
-        awarded_completed_container = IAwardedCompletedItemContainer(completion_context)
-        
-        assert_that(awarded_completed_container, not_none())
-        assert_that(awarded_completed_container, has_length(0))
-        assert_that(awarded_completed_container.get_awarded_completed_item_count(completable1),
-                    is_(0))
-        assert_that(awarded_completed_container.remove_item(completable1), is_(0))
-        
-        user_awarded_container = component.queryMultiAdapter((user1, completion_context),
-                                                     IPrincipalAwardedCompletedItemContainer)
-        
-        assert_that(user_awarded_container, not_none())
-        assert_that(user_awarded_container.Principal, is_(user1))
-        assert_that(user_awarded_container.get_awarded_completed_item_count(), is_(0))
-        assert_that(user_awarded_container.get_awarded_completed_item(completable1), none())
-        assert_that(user_awarded_container.remove_item(completable1), is_(False))
-        
-        awarded_completed_item1 = AwardedCompletedItem(Principal=user1,
-                                                       Item=completable1,
-                                                       CompletedDate=now,
-                                                       awarder=site_admin,
-                                                       reason=u"Good Soup")
-        
-        user_awarded_container.add_awarded_completed_item(awarded_completed_item1)
-        assert_that(user_awarded_container.get_awarded_completed_item_count(), is_(1))
-        assert_that(user_awarded_container.get_awarded_completed_item(completable1),
-                    is_(awarded_completed_item1))
-        assert_that(awarded_completed_item1, validly_provides(IAwardedCompletedItem))
-        assert_that(awarded_completed_item1, verifiably_provides(IAwardedCompletedItem))
-        assert_that(awarded_completed_item1.Item, is_(completable1))
-        assert_that(awarded_completed_item1._item, not_none())
-        assert_that(awarded_completed_item1.item_ntiid, is_(completable1.ntiid))
-
-        # Idempotent
-        user_awarded_container.add_awarded_completed_item(awarded_completed_item1)
-        assert_that(user_awarded_container.get_awarded_completed_item_count(), is_(1))
-        assert_that(user_awarded_container.get_awarded_completed_item(completable1),
-                    is_(awarded_completed_item1))
-
-        # Second user
-        user_awarded_container2 = component.queryMultiAdapter((user2, completion_context),
-                                                      IPrincipalAwardedCompletedItemContainer)
-
-        with self.assertRaises(AssertionError):
-            # Add to incorrect container
-            user_awarded_container2.add_awarded_completed_item(awarded_completed_item1)
-
-        # Multiple
-        awarded_completed_item2 = AwardedCompletedItem(Principal=user1, 
-                                                       Item=completable2,
-                                                       CompletedDate=now,
-                                                       awarder=site_admin,
-                                                       reason="Vanguard Override")
-        user_awarded_container.add_awarded_completed_item(awarded_completed_item2)
-        assert_that(user_awarded_container.get_awarded_completed_item_count(), is_(2))
-
-        awarded_completed_item3 = AwardedCompletedItem(Principal=user2, 
-                                                       Item=completable2,
-                                                       CompletedDate=now,
-                                                       awarder=site_admin,
-                                                       reason="Cayde-6's Favorite")
-        
-        user_awarded_container2.add_awarded_completed_item(awarded_completed_item3)
-        assert_that(user_awarded_container2.get_awarded_completed_item_count(), is_(1))
-
-        # Validate counts
-        assert_that(awarded_completed_container.get_awarded_completed_item_count(completable1),
-                    is_(1))
-        assert_that(awarded_completed_container.get_awarded_completed_item_count(completable2),
-                    is_(2))
-
-        # Removal
-        remove_count = awarded_completed_container.remove_item(completable1)
-        assert_that(remove_count, is_(1))
-        assert_that(awarded_completed_container.get_awarded_completed_item_count(completable1),
-                    is_(0))
-        assert_that(awarded_completed_container.get_awarded_completed_item_count(completable2),
-                    is_(2))
-
-        assert_that(user_awarded_container.get_awarded_completed_item_count(), is_(1))
-        assert_that(user_awarded_container.get_awarded_completed_item(completable1), none())
-
-        assert_that(user_awarded_container2.get_awarded_completed_item_count(), is_(1))
-        assert_that(user_awarded_container2.get_awarded_completed_item(completable1), none())
-
-        # Removal of second item
-        remove_count = awarded_completed_container.remove_item(completable2)
-        assert_that(remove_count, is_(2))
-        assert_that(awarded_completed_container.get_awarded_completed_item_count(completable1),
-                    is_(0))
-        assert_that(awarded_completed_container.get_awarded_completed_item_count(completable2),
-                    is_(0))
-
-        assert_that(user_awarded_container.get_awarded_completed_item_count(), is_(0))
-        assert_that(user_awarded_container.get_awarded_completed_item(completable2), none())
-
-        assert_that(user_awarded_container2.get_awarded_completed_item_count(), is_(0))
-        assert_that(user_awarded_container2.get_awarded_completed_item(completable2), none())
 
 class TestRemoved(unittest.TestCase):
 
