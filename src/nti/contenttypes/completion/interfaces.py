@@ -33,6 +33,7 @@ from nti.contenttypes.completion import CERTIFICATE_RENDERER_VOCAB_NAME
 from nti.dataserver.activitystream_change import Change
 
 from nti.dataserver.interfaces import IStreamChangeEvent
+from nti.dataserver.interfaces import IUser
 
 from nti.ntiids.schema import ValidNTIID
 
@@ -45,6 +46,7 @@ from nti.schema.field import Number
 from nti.schema.field import Choice
 from nti.schema.field import TextLine
 from nti.schema.field import ValidDatetime
+from nti.schema.field import ValidText
 from nti.schema.field import ValidTextLine
 from nti.schema.field import UniqueIterable
 
@@ -85,7 +87,20 @@ class ICompletedItem(IContained):
                    default=True)
 
     ItemNTIID = ValidNTIID(title=u"Completed Item NTIID", required=False, default=None)
-
+    
+class IAwardedCompletedItem(ICompletedItem):
+    """
+    A :class: `ICompletedItem` that can be manually awarded by a course admin
+    Contains information on who awarded it and, optionally, a reason it was awarded
+    """
+    
+    awarder = Object(IPrincipal,
+                   title=u'Awarder Principal',
+                   description=u'The principal who awarded this item',
+                   required=True)
+    
+    reason = ValidText(title=u'Explanation for awarding the item',
+                               required=False)
 
 class ICompletionContext(ICompletableItem, IAttributeAnnotatable):
     """
@@ -396,7 +411,15 @@ class IPrincipalCompletedItemContainer(IContainer, IContained, INoAutoIndexEver)
         Remove all :class:`ICompletedItem` referenced by the given
         :class:`ICompletableItem` from this container.
         """
+        
+        
+class IPrincipalAwardedCompletedItemContainer(IPrincipalCompletedItemContainer):
+    """
+    Contains :class:`IAwardedCompletedItem` that have been awarded to a user by a course admin
+    """
 
+    contains(IAwardedCompletedItem)
+    containers('.IAwardedCompletedItemContainer')
 
 class ICompletedItemContainer(IContainer):
     """
@@ -430,6 +453,15 @@ class ICompletedItemContainer(IContainer):
         Remove all :class:`ICompletedItem` objects referenced by the given
         :class:`ICompletableItem`, returning the count of removed items.
         """
+        
+class IAwardedCompletedItemContainer(ICompletedItemContainer):
+    """
+    Contains items that have been manually marked as completed
+    by a course admin for the :class:`ICompletionContext`, organized with
+    :class:`IPrincipalAwardedCompletedItemContainer` objects.
+    """
+    contains(IPrincipalAwardedCompletedItemContainer)
+    
 
 class IProgress(interface.Interface):
     """

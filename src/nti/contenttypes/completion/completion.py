@@ -15,7 +15,9 @@ from zope import interface
 from zope.security.interfaces import IPrincipal
 
 from nti.contenttypes.completion.interfaces import ICompletedItem
+from nti.contenttypes.completion.interfaces import IAwardedCompletedItem
 from nti.contenttypes.completion.interfaces import IPrincipalCompletedItemContainer
+from nti.contenttypes.completion.interfaces import IPrincipalAwardedCompletedItemContainer
 
 from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeContainer
 
@@ -84,7 +86,11 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
         except KeyError:
             result = False
         return result
-
+    
+@interface.implementer(IPrincipalAwardedCompletedItemContainer)
+class PrincipalAwardedCompletedItemContainer(PrincipalCompletedItemContainer):
+    
+    createDirectFieldProperties(IPrincipalAwardedCompletedItemContainer)
 
 @WithRepr
 @interface.implementer(ICompletedItem)
@@ -129,3 +135,15 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject,
     @property
     def ItemNTIID(self):
         return self._item_ntiid or self.__name__
+    
+@WithRepr
+@interface.implementer(IAwardedCompletedItem)
+class AwardedCompletedItem(CompletedItem):
+
+    mimeType = mime_type = "application/vnd.nextthought.completion.awardedcompleteditem"
+
+    def __init__(self, Principal=None, Item=None, Success=True, CompletedDate=None, awarder=None, reason=None, *args, **kwargs):
+        # See note in Progress about why this is not schema configured.
+        super(AwardedCompletedItem, self).__init__(Principal=Principal, Item=Item, Success=Success, CompletedDate=CompletedDate, *args, **kwargs)
+        self.awarder = IPrincipal(awarder)
+        self.reason = reason
