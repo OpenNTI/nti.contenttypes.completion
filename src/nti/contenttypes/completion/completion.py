@@ -23,17 +23,21 @@ from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeCo
 
 from nti.dataserver.sharing import AbstractReadableSharedMixin
 
+from nti.dublincore.datastructures import PersistentCreatedModDateTrackingObject
+
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
 from nti.externalization.representation import WithRepr
 
 from nti.property.property import alias
 
+from nti.schema.fieldproperty import createFieldProperties
 from nti.schema.fieldproperty import createDirectFieldProperties
 
 from nti.schema.schema import SchemaConfigured
 
 from nti.wref.interfaces import IWeakRef
+from dns.rdataclass import NONE
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -91,12 +95,35 @@ class PrincipalCompletedItemContainer(CaseInsensitiveCheckingLastModifiedBTreeCo
 class PrincipalAwardedCompletedItemContainer(PrincipalCompletedItemContainer):
     
     createDirectFieldProperties(IPrincipalAwardedCompletedItemContainer)
+    
+    
+class CompletedItemMixin(object):
+    """
+    A mixin for shared functions of CompletedItems and its children objects
+    """
+    
+    @property
+    def sharedWith(self):
+        return (self.Principal.id,)
+
+    @property
+    def Item(self):
+        result = None
+        if self._item is not None:
+            result = self._item()
+        return result
+
+    @property
+    def ItemNTIID(self):
+        return self._item_ntiid or self.__name__
+
 
 @WithRepr
 @interface.implementer(ICompletedItem)
 class CompletedItem(PersistentCreatedAndModifiedTimeObject, 
                     Contained,
-                    AbstractReadableSharedMixin):
+                    AbstractReadableSharedMixin,
+                    CompletedItemMixin):
 
     __external_can_create__ = False
 
@@ -120,30 +147,73 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject,
         self._item = IWeakRef(Item)
         self._item_ntiid = Item.ntiid
         self.Principal = IPrincipal(Principal)
-
-    @property
-    def sharedWith(self):
-        return (self.Principal.id,)
-
-    @property
-    def Item(self):
-        result = None
-        if self._item is not None:
-            result = self._item()
-        return result
-
-    @property
-    def ItemNTIID(self):
-        return self._item_ntiid or self.__name__
     
 @WithRepr
 @interface.implementer(IAwardedCompletedItem)
-class AwardedCompletedItem(CompletedItem):
+class AwardedCompletedItem(PersistentCreatedAndModifiedTimeObject, 
+                           Contained,
+                           CompletedItemMixin,
+                           SchemaConfigured):
+    
+    createFieldProperties(ICompletedItem)
+    createDirectFieldProperties(IAwardedCompletedItem)
+    
+    __external_can_create__ = True
+    
+    creator = None
+    
+    __parent__ = None
+    __name__ = None
+    _item = None
+    _Principal = None
+    _awarder = None
+    _Item = None
+    _item_ntiid = None
+    Success = True
+    CompletedDate = None
+
+    user = alias('Principal')
+    item_ntiid = alias('ItemNTIID')
 
     mimeType = mime_type = "application/vnd.nextthought.completion.awardedcompleteditem"
+    
+    def __init__(self, *args, **kwargs):
+        SchemaConfigured.__init__(self, *args, **kwargs)
+        PersistentCreatedAndModifiedTimeObject.__init__(self)
 
-    def __init__(self, Principal=None, Item=None, Success=True, CompletedDate=None, awarder=None, reason=None, *args, **kwargs):
-        # See note in Progress about why this is not schema configured.
-        super(AwardedCompletedItem, self).__init__(Principal=Principal, Item=Item, Success=Success, CompletedDate=CompletedDate, *args, **kwargs)
-        self.awarder = IPrincipal(awarder)
-        self.reason = reason
+    @property
+    def Principal(self):
+        result = None
+        if self._Principal is not None:
+            result = self._Principal
+        return result
+        
+    @Principal.setter
+    def Principal(self, value):
+        if value is not None:
+            self._Principal = IPrincipal(value)
+            
+    @property
+    def awarder(self):
+        result = None
+        if self._awarder is not None:
+            result = self._awarder
+        return result
+        
+    @awarder.setter
+    def awarder(self, value):
+        if value is not None:
+            self._awarder = IPrincipal(value)
+            
+    @property
+    def Item(self):
+        result = None
+        if self._Item is not None:
+            result = self._Item
+        return result
+        
+    @Item.setter
+    def Item(self, value):
+        from IPython.terminal.debugger import set_trace;set_trace()
+        if value is not None:
+            self._Item = IWeakRef(value)

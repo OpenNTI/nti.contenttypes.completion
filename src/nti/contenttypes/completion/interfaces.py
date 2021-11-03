@@ -27,6 +27,7 @@ from zope.interface.interfaces import IObjectEvent
 from zope.security.interfaces import IPrincipal
 
 from nti.base.interfaces import ILastModified
+from nti.base.interfaces import ICreated
 
 from nti.contenttypes.completion import CERTIFICATE_RENDERER_VOCAB_NAME
 
@@ -88,16 +89,17 @@ class ICompletedItem(IContained):
 
     ItemNTIID = ValidNTIID(title=u"Completed Item NTIID", required=False, default=None)
     
-class IAwardedCompletedItem(ICompletedItem):
+class IAwardedCompletedItem(ICompletedItem, ICreated):
     """
     A :class: `ICompletedItem` that can be manually awarded by a course admin
     Contains information on who awarded it and, optionally, a reason it was awarded
     """
-    
+
     awarder = Object(IPrincipal,
                    title=u'Awarder Principal',
                    description=u'The principal who awarded this item',
                    required=True)
+    awarder.setTaggedValue('_ext_excluded_out', True)
     
     reason = ValidText(title=u'Explanation for awarding the item',
                                required=False)
@@ -173,6 +175,18 @@ class ICompletedItemProvider(ILastModified):
     def completed_items():
         """
         A generator of :class:`ICompletedItem` objects.
+        """
+        
+        
+class IAwardedCompletedItemProvider(interface.Interface):
+    """
+    Something that can provide a :class:`IAwardedCompletedItem` for a given
+    :class:`ICompletableItem` and two :class:`IUser` objects, the one being
+    awarded the item and the awarder themselves
+    """
+    def __call_(completableItem, user, awarder):
+        """
+        A callable that returns an IAwardedCompletedItem object
         """
 
 
