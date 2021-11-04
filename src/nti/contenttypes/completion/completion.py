@@ -99,7 +99,7 @@ class PrincipalAwardedCompletedItemContainer(PrincipalCompletedItemContainer):
     
 class CompletedItemMixin(object):
     """
-    A mixin for shared functions of CompletedItems and its children objects
+    A mixin for shared functions and properties of CompletedItems and its children objects
     """
     
     @property
@@ -155,19 +155,16 @@ class AwardedCompletedItem(PersistentCreatedAndModifiedTimeObject,
                            CompletedItemMixin,
                            SchemaConfigured):
     
-    createFieldProperties(ICompletedItem)
+    createDirectFieldProperties(ICompletedItem)
     createDirectFieldProperties(IAwardedCompletedItem)
     
     __external_can_create__ = True
     
-    creator = None
+    creator = alias('awarder')
     
     __parent__ = None
     __name__ = None
     _item = None
-    _Principal = None
-    _awarder = None
-    _Item = None
     _item_ntiid = None
     Success = True
     CompletedDate = None
@@ -181,6 +178,15 @@ class AwardedCompletedItem(PersistentCreatedAndModifiedTimeObject,
         SchemaConfigured.__init__(self, *args, **kwargs)
         PersistentCreatedAndModifiedTimeObject.__init__(self)
 
+    #Needed to redefine this here because it seems aliases don't work with @properties from the mixin?
+    @property
+    def ItemNTIID(self):
+        return self._item_ntiid or self.__name__
+    
+    @ItemNTIID.setter
+    def ItemNTIID(self, value):
+        pass
+    
     @property
     def Principal(self):
         result = None
@@ -208,12 +214,12 @@ class AwardedCompletedItem(PersistentCreatedAndModifiedTimeObject,
     @property
     def Item(self):
         result = None
-        if self._Item is not None:
-            result = self._Item
+        if self._item is not None:
+            result = self._item()
         return result
         
     @Item.setter
     def Item(self, value):
-        from IPython.terminal.debugger import set_trace;set_trace()
         if value is not None:
-            self._Item = IWeakRef(value)
+            self._item = IWeakRef(value)
+            self._item_ntiid = value.ntiid

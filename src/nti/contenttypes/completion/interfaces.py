@@ -77,6 +77,7 @@ class ICompletedItem(IContained):
                   title=u'The completable item',
                   required=True)
     Item.setTaggedValue('_ext_excluded_out', True)
+    Item.setTaggedValue('_ext_allow_initial_set', True)
 
     CompletedDate = ValidDatetime(title=u"The completed date",
                                   description=u"""The date on which the item
