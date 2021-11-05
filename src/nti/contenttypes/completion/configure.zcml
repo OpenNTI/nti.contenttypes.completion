@@ -77,6 +77,10 @@
                          .interfaces.ICompletionContextCompletionPolicyContainer
                          .interfaces.ICompletableItemAggregateCompletionPolicy"
         modules=".adapters .policies .completion" />
+        
+    <adapter factory=".io.AwardedCompletedItemIO"
+			 for=".interfaces.IAwardedCompletedItem"
+			 provides="nti.externalization.interfaces.IInternalObjectUpdater" />
 
     <adapter factory=".policies.AbstractCompletableItemCompletionPolicyIO"
              for=".interfaces.ICompletableItemCompletionPolicy"

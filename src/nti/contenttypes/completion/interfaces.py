@@ -27,6 +27,7 @@ from zope.interface.interfaces import IObjectEvent
 from zope.security.interfaces import IPrincipal
 
 from nti.base.interfaces import ILastModified
+from nti.base.interfaces import ICreated
 
 from nti.contenttypes.completion import CERTIFICATE_RENDERER_VOCAB_NAME
 
@@ -76,6 +77,7 @@ class ICompletedItem(IContained):
                   title=u'The completable item',
                   required=True)
     Item.setTaggedValue('_ext_excluded_out', True)
+    Item.setTaggedValue('_ext_allow_initial_set', True)
 
     CompletedDate = ValidDatetime(title=u"The completed date",
                                   description=u"""The date on which the item
@@ -88,12 +90,12 @@ class ICompletedItem(IContained):
 
     ItemNTIID = ValidNTIID(title=u"Completed Item NTIID", required=False, default=None)
     
-class IAwardedCompletedItem(ICompletedItem):
+class IAwardedCompletedItem(ICompletedItem, ICreated):
     """
     A :class: `ICompletedItem` that can be manually awarded by a course admin
     Contains information on who awarded it and, optionally, a reason it was awarded
     """
-    
+
     awarder = Object(IPrincipal,
                    title=u'Awarder Principal',
                    description=u'The principal who awarded this item',
@@ -174,8 +176,7 @@ class ICompletedItemProvider(ILastModified):
         """
         A generator of :class:`ICompletedItem` objects.
         """
-
-
+        
 class ICertificateRenderer(interface.Interface):
 
     macro_name = ValidTextLine(title=u'The cert macro name',
