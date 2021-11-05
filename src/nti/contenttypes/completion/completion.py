@@ -97,10 +97,21 @@ class PrincipalAwardedCompletedItemContainer(PrincipalCompletedItemContainer):
     createDirectFieldProperties(IPrincipalAwardedCompletedItemContainer)
     
     
-class CompletedItemMixin(object):
+class AbstractCompletedItem(Contained,
+                            PersistentCreatedAndModifiedTimeObject):
     """
-    A mixin for shared functions and properties of CompletedItems and its children objects
+    An abstract class with functions and properties shared between kinds of completed items
     """
+    
+    __parent__ = None
+    __name__ = None
+    _item = None
+    _item_ntiid = None
+    Success = True
+    CompletedDate = None
+    
+    user = alias('Principal')
+    item_ntiid = alias('ItemNTIID')
     
     @property
     def sharedWith(self):
@@ -120,22 +131,10 @@ class CompletedItemMixin(object):
 
 @WithRepr
 @interface.implementer(ICompletedItem)
-class CompletedItem(PersistentCreatedAndModifiedTimeObject, 
-                    Contained,
-                    AbstractReadableSharedMixin,
-                    CompletedItemMixin):
+class CompletedItem(AbstractCompletedItem,
+                    AbstractReadableSharedMixin):
 
-    __external_can_create__ = False
-
-    __parent__ = None
-    __name__ = None
-    _item = None
-    _item_ntiid = None
-    Success = True
-    CompletedDate = None
-
-    user = alias('Principal')
-    item_ntiid = alias('ItemNTIID')
+    __external_can_create__ = False 
 
     mimeType = mime_type = "application/vnd.nextthought.completion.completeditem"
 
@@ -150,9 +149,7 @@ class CompletedItem(PersistentCreatedAndModifiedTimeObject,
     
 @WithRepr
 @interface.implementer(IAwardedCompletedItem)
-class AwardedCompletedItem(PersistentCreatedAndModifiedTimeObject, 
-                           Contained,
-                           CompletedItemMixin,
+class AwardedCompletedItem(AbstractCompletedItem,
                            SchemaConfigured):
     
     createDirectFieldProperties(ICompletedItem)
@@ -161,16 +158,6 @@ class AwardedCompletedItem(PersistentCreatedAndModifiedTimeObject,
     __external_can_create__ = True
     
     creator = alias('awarder')
-    
-    __parent__ = None
-    __name__ = None
-    _item = None
-    _item_ntiid = None
-    Success = True
-    CompletedDate = None
-
-    user = alias('Principal')
-    item_ntiid = alias('ItemNTIID')
 
     mimeType = mime_type = "application/vnd.nextthought.completion.awardedcompleteditem"
     
@@ -178,7 +165,7 @@ class AwardedCompletedItem(PersistentCreatedAndModifiedTimeObject,
         SchemaConfigured.__init__(self, *args, **kwargs)
         PersistentCreatedAndModifiedTimeObject.__init__(self)
 
-    #Needed to redefine this here because it seems aliases don't work with @properties from the mixin?
+    # Needed to redefine this here because internalization seems to not like using the property from the abstract class
     @property
     def ItemNTIID(self):
         return self._item_ntiid or self.__name__
@@ -186,7 +173,7 @@ class AwardedCompletedItem(PersistentCreatedAndModifiedTimeObject,
     @ItemNTIID.setter
     def ItemNTIID(self, value):
         pass
-    
+
     @property
     def Principal(self):
         result = None

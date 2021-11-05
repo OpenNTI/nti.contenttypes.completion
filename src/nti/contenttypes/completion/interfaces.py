@@ -100,7 +100,6 @@ class IAwardedCompletedItem(ICompletedItem, ICreated):
                    title=u'Awarder Principal',
                    description=u'The principal who awarded this item',
                    required=True)
-    awarder.setTaggedValue('_ext_excluded_out', True)
     
     reason = ValidText(title=u'Explanation for awarding the item',
                                required=False)
