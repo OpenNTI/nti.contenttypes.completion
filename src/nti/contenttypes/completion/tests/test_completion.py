@@ -351,7 +351,7 @@ class TestCompletion(unittest.TestCase):
                                                        Item=completable2,
                                                        CompletedDate=now,
                                                        awarder=site_admin,
-                                                       reason="Vanguard Override")
+                                                       reason=u"Vanguard Override")
         user_awarded_container.add_completed_item(awarded_completed_item2)
         assert_that(user_awarded_container.get_completed_item_count(), is_(2))
 
@@ -359,7 +359,7 @@ class TestCompletion(unittest.TestCase):
                                                        Item=completable2,
                                                        CompletedDate=now,
                                                        awarder=site_admin,
-                                                       reason="Cayde-6's Favorite")
+                                                       reason=u"Cayde-6's Favorite")
         
         user_awarded_container2.add_completed_item(awarded_completed_item3)
         assert_that(user_awarded_container2.get_completed_item_count(), is_(1))
