@@ -23,21 +23,17 @@ from nti.containers.containers import CaseInsensitiveCheckingLastModifiedBTreeCo
 
 from nti.dataserver.sharing import AbstractReadableSharedMixin
 
-from nti.dublincore.datastructures import PersistentCreatedModDateTrackingObject
-
 from nti.dublincore.time_mixins import PersistentCreatedAndModifiedTimeObject
 
 from nti.externalization.representation import WithRepr
 
 from nti.property.property import alias
 
-from nti.schema.fieldproperty import createFieldProperties
 from nti.schema.fieldproperty import createDirectFieldProperties
 
 from nti.schema.schema import SchemaConfigured
 
 from nti.wref.interfaces import IWeakRef
-from dns.rdataclass import NONE
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -98,7 +94,8 @@ class PrincipalAwardedCompletedItemContainer(PrincipalCompletedItemContainer):
     
     
 class AbstractCompletedItem(Contained,
-                            PersistentCreatedAndModifiedTimeObject):
+                            PersistentCreatedAndModifiedTimeObject,
+                            AbstractReadableSharedMixin):
     """
     An abstract class with functions and properties shared between kinds of completed items
     """
@@ -131,8 +128,7 @@ class AbstractCompletedItem(Contained,
 
 @WithRepr
 @interface.implementer(ICompletedItem)
-class CompletedItem(AbstractCompletedItem,
-                    AbstractReadableSharedMixin):
+class CompletedItem(AbstractCompletedItem):
 
     __external_can_create__ = False 
 
@@ -164,15 +160,6 @@ class AwardedCompletedItem(AbstractCompletedItem,
     def __init__(self, *args, **kwargs):
         SchemaConfigured.__init__(self, *args, **kwargs)
         PersistentCreatedAndModifiedTimeObject.__init__(self)
-
-    # Needed to redefine this here because internalization seems to not like using the property from the abstract class
-    @property
-    def ItemNTIID(self):
-        return self._item_ntiid or self.__name__
-    
-    @ItemNTIID.setter
-    def ItemNTIID(self, value):
-        pass
 
     @property
     def Principal(self):
@@ -209,4 +196,6 @@ class AwardedCompletedItem(AbstractCompletedItem,
     def Item(self, value):
         if value is not None:
             self._item = IWeakRef(value)
-            self._item_ntiid = value.ntiid
+            self._item_ntiid = self.ItemNTIID = value.ntiid
+        else:
+            self.ItemNTIID = self.__name__

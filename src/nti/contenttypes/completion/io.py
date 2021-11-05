@@ -14,7 +14,7 @@ from nti.contenttypes.completion.interfaces import IAwardedCompletedItem
 
 class AwardedCompletedItemIO(InterfaceObjectIO):
 
-    __allowed_keys__ = frozenset({'Principal', 'Item', 'awarder'})
+    __allowed_keys__ = frozenset({'Principal', 'Item'})
 
     _ext_iface_upper_bound = IAwardedCompletedItem
 

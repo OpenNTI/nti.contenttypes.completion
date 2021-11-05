@@ -177,19 +177,6 @@ class ICompletedItemProvider(ILastModified):
         A generator of :class:`ICompletedItem` objects.
         """
         
-        
-class IAwardedCompletedItemProvider(interface.Interface):
-    """
-    Something that can provide a :class:`IAwardedCompletedItem` for a given
-    :class:`ICompletableItem` and two :class:`IUser` objects, the one being
-    awarded the item and the awarder themselves
-    """
-    def __call_(completableItem, user, awarder):
-        """
-        A callable that returns an IAwardedCompletedItem object
-        """
-
-
 class ICertificateRenderer(interface.Interface):
 
     macro_name = ValidTextLine(title=u'The cert macro name',
